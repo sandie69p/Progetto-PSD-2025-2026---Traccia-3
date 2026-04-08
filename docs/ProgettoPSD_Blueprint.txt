@@ -1,19 +1,31 @@
-|| Progetto PSD ||
-	Requirements:
-		-> Registro Segnalazioni:
-			-> Codice identificativo;
-			-> Nome Cittadino;
-			-> Tipo problema;
-			-> Descrizione;
-			-> Data segnalazione;
-			-> Urgenza (Gravita' Problema);
-			-> Stato (Non risolto, In risoluzione, In revisione, Risolto);
-		-> Operazioni richeste:
-			-> Visualizzazione di tutte le segnalazione;
-			-> Filtro per Categoria || Codice;
-			-> Eliminazione?...;
-		-> Generazione report segnalazione;
-			-> Riepilogo di: Numero totale di segnalazioni;
-			-> Conteggio per categoria (Urgenza, Data, Stato, Tipo problema...);
-	FILE:
-		-> C99 con make file (a mano), rispetto a cmake (automatico);
+|| Progetto PSD Blueprint ||
+	1. Obbiettivo del Sistema:
+		-> Gestione segnalazioni urbane per un Comune;
+		-> Operazioni:
+			Registrazione, ricerca, aggiornamento stato, eliminazione, reportistica;
+	2. Architettura dei Dati:
+		-> ID (Codice identificativo univoco);
+		-> Cittadino (Nome del segnalante);
+		-> Categoria (Tipo problema:
+										-> Illuminazione, rifiuti, strade);
+		-> Descrizione: Descrizione del problema;
+		-> Data: Data inserimento del problema;
+		-> Urgenza (Livello gravita' del problema);
+		-> Stato: (Aperta, Risoluzione, Revisione, Chiusa);
+	3. Strategia tipo ADT (Indicizzazione Multipla);
+		-> Struttura Principale:
+			|| Lista collegata o Albero Binario (BST) ordinato per "Codice ID" per ricerche rapide;
+		-> Indice urgenza:
+			|| Coda con priorita' (Heap) per estrarre le segnalazioni piu' urgenti;
+		-> Gestione Memoria:
+			|| Utilizzo dei puntatori ai record originali per evitare duplicazioni di dati in memoria;
+	4. Flussio di lavoro personale:
+		-> Sviluppo:
+			|| Ambiente CMake per test rapidi e debug esclusivamente durante la fase di coding;
+		-> Consegna: 29 Maggio 2026
+			|| Makefile scritto a mano (Standard C99);
+		-> Controllo versione:
+			|| Git con commit descrittivi ed esaustivi sulle modifiche & aggiunte;
+
+By 		~/Salvatore Pisu\~
+alias ~/sandie69p\~
