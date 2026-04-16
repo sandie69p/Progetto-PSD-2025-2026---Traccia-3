@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "./components/HUD/hud.h"
+#include "./components/adt/struct.h"
 
 int main(void) {
 
