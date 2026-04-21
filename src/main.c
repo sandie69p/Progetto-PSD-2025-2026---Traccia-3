@@ -6,6 +6,9 @@
 #include "./components/adt/struct.h"
 
 int main(void) {
+  
+  Root sistema = init_root();
+
 
   while(1) {
     
@@ -21,6 +24,7 @@ int main(void) {
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
     printf(" #   - Creare una segnalazione:           1          # \n");
     printf(" #   - Rimuovere una segnalazione:        2          # \n");
+    printf(" #   - Segnalazioni urgenti:              0          # \n");
     printf(" #   - Salvare ed uscire:                 0          # \n");
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
   
