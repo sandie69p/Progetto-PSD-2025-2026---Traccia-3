@@ -1,84 +1,173 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "struct.h"
+#include "./struct.h"
 
-typedef enum {
-  APERTO, 
-  RISOLUZIONE, 
-  CHIUSO
-} Stato;
-
-typedef struct segnalazione {
+struct segnalazione {
   int id;                     // SSNNNN
   char nome_cittadino[64];
   char categoria[64];
   char descrizione[1024];
   int data;                   // YYYYMMDD
   int urgenza;
-  Stato stato_segnalazione;
-  struct segnalazione *next;
-} Segnalazione;
+  int stato;
+  s nextId;
+  s nextData;
+  s nextStato;
+  s nextUrg;
+};
 
 typedef struct apertoNode {
-  struct segnalazione *head;
+  s head;
 } apertoNode;
 
 typedef struct risNode {
-  struct segnalazione *head;
+  s head;
 } risNode;
 
 typedef struct chiusoNode {
-  struct segnalazione *head;
+  s head;
 } chiusoNode;
 
+typedef enum {
+  incendio = 0,
+  illuminazione,
+  rifiuti,
+  strade,
+  verde,
+  allagamento,
+  segnaletica,
+  edilizia,
+  randagismo,
+  inquinamento,
+  sicurezza,
+  allCat
+} catId;
+
 typedef struct idNode {
-  struct segnalazione *head;
+  s cat[allCat];
 } idNode;
 
 typedef struct dataNode {
-  struct segnalazione *head;
+  s head;
 } dataNode;
 
 typedef struct urgNode {
-  struct segnalazione *head;
+  s priority[5];
 } urgNode;
 
 typedef struct statoNode {
-  struct apertoNode *aperto;
-  struct risNode *risoluzione;
-  struct chiusoNode *chiuso;
+  apertoNode *aperto;
+  risNode *risoluzione;
+  chiusoNode *chiuso;
 } statoNode;
 
-typedef struct root {
-  struct idNode *id;
-  struct dataNode *data;
-  struct statoNode *stato;
-  struct urgNode *urgenti;
+struct root {
+  idNode *id;
+  dataNode *data;
+  statoNode *stato;
+  urgNode *urgenza;
   int totSegnalazioni;
-} Root;
+};
 
 Root init_root() {
   Root r = (Root) malloc(sizeof(struct root));
   if(r == NULL) return NULL;
   
   // Inizializzo i nodi di controllo
-  r->id = (struct idNode *) malloc(sizeof(struct idNode));
-  r->data = (struct dataNode *) malloc(sizeof(struct dataNode));
-  r->urgenti = (struct dataNode *) malloc(sizeof(struct urgNode));
-  r->stato = (struct statoNode *) malloc(sizeof(struct statoNode));
+  r->id = (idNode *) malloc(sizeof(idNode));
+  r->data = (dataNode *) malloc(sizeof(dataNode));
+  r->urgenza = (urgNode *) malloc(sizeof(urgNode));
+  r->stato = (statoNode *) malloc(sizeof(statoNode));
   
   // Inizializzo i nodi di controllo di secondo livello
-  r->stato->aperto = (struct apertoNode *) malloc(sizeof(struct apertoNode));
-  r->stato->risoluzione = (struct risNode *) malloc(sizeof(struct risNode));
-  r->stato->chiuso = (struct chiusoNode *) malloc(sizeof(struct chiusoNode));
+  r->stato->aperto = (apertoNode *) malloc(sizeof(apertoNode));
+  r->stato->risoluzione = (risNode *) malloc(sizeof(risNode));
+  r->stato->chiuso = (chiusoNode *) malloc(sizeof(chiusoNode));
   
-  r->id->head = NULL;
+  for (int i = 0; i < allCat; i++) r->id->cat[i] = NULL;
   r->data->head = NULL;
-  r->urgenti->head = NULL;
+  for (int i = 0; i < 5; i ++) r->urgenza->priority[i] = NULL;
   r->stato->aperto->head = NULL;
   r->stato->risoluzione->head = NULL;
   r->stato->chiuso->head = NULL;
   
   r->totSegnalazioni = 0;
+
+  return r;
 }
+
+void insertOnGraph(Root r, s newSeg) {
+  int prefisso = newSeg->id / 10000;
+  int catIdx;
+
+  switch (prefisso) {
+    case 10: catIdx = illuminazione; break;
+    case 20: catIdx = rifiuti; break;
+    case 30: catIdx = strade; break;
+    case 40: catIdx = verde; break;
+    case 50: catIdx = incendio; break;
+    case 60: catIdx = allagamento; break;
+    case 70: catIdx = segnaletica; break;
+    case 80: catIdx = edilizia; break;
+    case 90: catIdx = randagismo; break;
+    case 11: catIdx = inquinamento; break;
+    case 21: catIdx = sicurezza; break;
+  }
+
+  if (catIdx != -1) {
+    newSeg->nextId = r->id->cat[catIdx];
+    r->id->cat[catIdx] = newSeg;
+
+    newSeg->nextData = r->data->head;
+    r->data->head = newSeg;
+
+    if (newSeg->stato == 0) {
+      newSeg->nextStato = r->stato->aperto->head;
+      r->stato->aperto->head = newSeg;
+    } else if (newSeg->stato == 1) {
+      newSeg->nextStato = r->stato->risoluzione->head;
+      r->stato->risoluzione->head = newSeg;
+    } else if (newSeg->stato == 2) {
+      newSeg->nextStato = r->stato->chiuso->head;
+      r->stato->chiuso->head = newSeg;
+    }
+
+    int urgIdx = newSeg->urgenza - 1;
+    if (urgIdx >= 0 && urgIdx < 5) {
+      newSeg->nextUrg = r->urgenza->priority[urgIdx];
+      r->urgenza->priority[urgIdx] = newSeg;
+    }
+    
+    r->totSegnalazioni++;
+  }
+}
+
+void init_loadingDb(Root r, const char *fileName) {
+  FILE *f = fopen(fileName, "rb");
+  if (f == NULL) { perror("Errore apertura file"); return; }
+
+
+  while (1)
+  {
+    s nuova = (s) malloc(sizeof(struct segnalazione));
+
+    size_t read = fread(&nuova->id, sizeof(int), 1, f);
+    if (read < 1) { free(nuova); break; }
+
+    fread(nuova->nome_cittadino, sizeof(char), 64, f);
+    fread(nuova->categoria, sizeof(char), 64, f);
+    fread(nuova->descrizione, sizeof(char), 1024, f);
+    fread(&nuova->data, sizeof(int), 1, f);
+    fread(&nuova->urgenza, sizeof(int), 1, f);
+    fread(&nuova->stato, sizeof(int), 1, f);
+
+    nuova->nextId = NULL;
+    nuova->nextData = NULL;
+    nuova->nextStato = NULL;
+    nuova->nextUrg = NULL;
+
+    insertOnGraph(r, nuova);
+  }
+}
+

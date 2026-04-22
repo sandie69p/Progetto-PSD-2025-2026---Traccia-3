@@ -2,13 +2,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include "./components/HUD/hud.h"
 #include "./components/adt/struct.h"
 
 int main(void) {
   
   Root sistema = init_root();
+  if (sistema == NULL) return 1;
 
+  clock_t start = clock();
+  printf("Caricamento di 5000 segnalazioni in corso... \n");
+  init_loadingDb(sistema, "./components/database/database.bin");
+  clock_t end = clock();
+  double time = ( (double) (end - start) / CLOCKS_PER_SEC);
+
+  printf("Risultato caricamento ");
+  printf("Tempo impiegato %.8f secondi \n", time);
+  printf("\nPremi INVIO per entrare nel portale...");
+  getchar();
 
   while(1) {
     
