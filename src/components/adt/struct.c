@@ -148,8 +148,7 @@ void init_loadingDb(Root r, const char *fileName) {
   if (f == NULL) { perror("Errore apertura file"); return; }
 
 
-  while (1)
-  {
+  while (1) {
     s nuova = (s) malloc(sizeof(struct segnalazione));
 
     size_t read = fread(&nuova->id, sizeof(int), 1, f);
@@ -171,3 +170,136 @@ void init_loadingDb(Root r, const char *fileName) {
   }
 }
 
+void init_sorting(Root r) {
+  int n = r->totSegnalazioni;
+
+  s *dataSeg = malloc(n * sizeof(s));
+
+  s curr = r->data->head;
+  for (int i = 0; i < n; i++) {
+    dataSeg[i] = curr;
+    curr = curr->nextData;
+  }
+
+  for (int i = 0; i < n - 1; i++) {
+    for (int j = 0; j < n-i-1; j++) {
+      if (dataSeg[j]->data > dataSeg[j+1]->data) {
+        s temp = dataSeg[j];
+        dataSeg[j] = dataSeg[j+1];
+        dataSeg[j+1] = temp;
+      }
+    }
+  }
+
+  r->data->head = dataSeg[0];
+  for (int i = 0; i < n - 1; i++) {
+    dataSeg[i]->nextData = dataSeg[i+1];
+  } dataSeg[n-1]->nextData = NULL;
+
+  // Inizio ordinamento id per categoria
+  for (int i = 0; i < n - 1; i++) {
+    for (int j = 0; j < n-i-1; j++) {
+      if (dataSeg[j]->id > dataSeg[j+1]->id) {
+        s temp = dataSeg[j];
+        dataSeg[j] = dataSeg[j+1];
+        dataSeg[j+1] = temp;
+      }
+    }
+  }
+
+  for(int i = 0; i < allCat; i++) {
+    r->id->cat[i] = NULL;
+  }
+
+  
+
+  // Inserimento a ritroso perche' e' l'inserimento in LIFO;
+  for(int i = n - 1; i >= 0; i--) {
+    s nodo = dataSeg[i];
+
+    int prefix = (int) nodo->id / 10000;
+    int catIdx = -1;
+
+    switch (prefix) {
+      case 10: catIdx = illuminazione; break;
+      case 20: catIdx = rifiuti; break;
+      case 30: catIdx = strade; break;
+      case 40: catIdx = verde; break;
+      case 50: catIdx = incendio; break;
+      case 60: catIdx = allagamento; break;
+      case 70: catIdx = segnaletica; break;
+      case 80: catIdx = edilizia; break;
+      case 90: catIdx = randagismo; break;
+      case 11: catIdx = inquinamento; break;
+      case 21: catIdx = sicurezza; break;
+    }
+
+    if(catIdx != -1) {
+      nodo->nextId = r->id->cat[catIdx];
+      r->id->cat[catIdx] = nodo;
+    }
+  }
+
+  // Inizio ordinamento urgenza
+  for (int i = 0; i < n - 1; i++) {
+    for (int j = 0; j < n-i-1; j++) {
+      if (dataSeg[j]->urgenza > dataSeg[j+1]->urgenza) {
+        s temp = dataSeg[j];
+        dataSeg[j] = dataSeg[j+1];
+        dataSeg[j+1] = temp;
+      }
+    }
+  }
+  
+  for (int i = 0; i < 5; i++) {
+    r->urgenza->priority[i] = NULL;
+  }
+
+  for (int i = n - 1; i >= 0; i--) {
+    s nodo = dataSeg[i];
+    int urgIdx = nodo->urgenza - 1;
+
+    if (urgIdx >= 0 && urgIdx < 5) {
+      nodo->nextUrg = r->urgenza->priority[urgIdx];
+      r->urgenza->priority[urgIdx] = nodo;
+    }
+  }
+
+  // Inizio ordinamento stati
+  for (int i = 0; i < n - 1; i++) {
+    for (int j = 0; j < n-i-1; j++) {
+      if (dataSeg[j]->stato > dataSeg[j+1]->stato) {
+        s temp = dataSeg[j];
+        dataSeg[j] = dataSeg[j+1];
+        dataSeg[j+1] = temp;
+      }
+    }
+  }
+
+  r->stato->aperto->head = NULL;
+  r->stato->chiuso->head = NULL;
+  r->stato->risoluzione->head = NULL;
+
+  for (int i = n - 1; i >= 0; i--) {
+    s nodo = dataSeg[i];
+
+    switch (nodo->stato) {
+      case 0: {
+        nodo->nextStato = r->stato->aperto->head;
+        r->stato->aperto->head = nodo;
+      } break;
+      
+      case 1: {
+        nodo->nextStato = r->stato->risoluzione->head;
+        r->stato->risoluzione->head = nodo;
+      } break;
+
+      case 2: {
+        nodo->nextStato = r->stato->chiuso->head;
+        r->stato->chiuso->head = nodo;
+      } break;
+    }
+  }
+
+  free(dataSeg);
+}
