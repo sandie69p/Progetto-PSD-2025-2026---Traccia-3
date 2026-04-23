@@ -170,6 +170,39 @@ void init_loadingDb(Root r, const char *fileName) {
   }
 }
 
+void quicksort(s *arr, int low, int high, int type) {
+  if (low < high) {
+    s pivot = arr[high];
+    int i = (low - 1);
+
+    for (int j = low; j <= high - 1; j++) {
+      int condition = 0;
+
+      switch (type) {
+        case 1: condition = (arr[j]->data < pivot->data); break;
+        case 2: condition = (arr[j]->id < pivot->id); break;
+        case 3: condition = (arr[j]->urgenza < pivot->urgenza); break;
+        case 4: condition = (arr[j]->stato < pivot->stato); break;
+      }
+
+      if (condition) {
+        i++;
+        s temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+      }
+    }
+
+    s temp = arr[i+1];
+    arr[i+1] = arr[high];
+    arr[high] = temp;
+
+    int pi = i + 1;
+    quicksort(arr, low, pi - 1, type);
+    quicksort(arr, pi + 1, high, type);
+  }
+}
+
 void init_sorting(Root r) {
   int n = r->totSegnalazioni;
 
@@ -181,15 +214,7 @@ void init_sorting(Root r) {
     curr = curr->nextData;
   }
 
-  for (int i = 0; i < n - 1; i++) {
-    for (int j = 0; j < n-i-1; j++) {
-      if (dataSeg[j]->data > dataSeg[j+1]->data) {
-        s temp = dataSeg[j];
-        dataSeg[j] = dataSeg[j+1];
-        dataSeg[j+1] = temp;
-      }
-    }
-  }
+  quicksort(dataSeg, 0, n - 1, 1);
 
   r->data->head = dataSeg[0];
   for (int i = 0; i < n - 1; i++) {
@@ -197,15 +222,7 @@ void init_sorting(Root r) {
   } dataSeg[n-1]->nextData = NULL;
 
   // Inizio ordinamento id per categoria
-  for (int i = 0; i < n - 1; i++) {
-    for (int j = 0; j < n-i-1; j++) {
-      if (dataSeg[j]->id > dataSeg[j+1]->id) {
-        s temp = dataSeg[j];
-        dataSeg[j] = dataSeg[j+1];
-        dataSeg[j+1] = temp;
-      }
-    }
-  }
+  quicksort(dataSeg, 0, n - 1, 2);
 
   for(int i = 0; i < allCat; i++) {
     r->id->cat[i] = NULL;
@@ -241,15 +258,7 @@ void init_sorting(Root r) {
   }
 
   // Inizio ordinamento urgenza
-  for (int i = 0; i < n - 1; i++) {
-    for (int j = 0; j < n-i-1; j++) {
-      if (dataSeg[j]->urgenza > dataSeg[j+1]->urgenza) {
-        s temp = dataSeg[j];
-        dataSeg[j] = dataSeg[j+1];
-        dataSeg[j+1] = temp;
-      }
-    }
-  }
+  quicksort(dataSeg, 0, n - 1, 3);
   
   for (int i = 0; i < 5; i++) {
     r->urgenza->priority[i] = NULL;
@@ -266,15 +275,7 @@ void init_sorting(Root r) {
   }
 
   // Inizio ordinamento stati
-  for (int i = 0; i < n - 1; i++) {
-    for (int j = 0; j < n-i-1; j++) {
-      if (dataSeg[j]->stato > dataSeg[j+1]->stato) {
-        s temp = dataSeg[j];
-        dataSeg[j] = dataSeg[j+1];
-        dataSeg[j+1] = temp;
-      }
-    }
-  }
+  quicksort(dataSeg, 0, n - 1, 4);
 
   r->stato->aperto->head = NULL;
   r->stato->chiuso->head = NULL;
