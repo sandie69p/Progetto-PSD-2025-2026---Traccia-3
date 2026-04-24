@@ -68,7 +68,7 @@ void getSeg(s node) {
     case 2: statoStr = "Chiusa"; break;
   }
 
-  printf(" # | %-8d | %-15.15s | %-10s | %-11s   | P: %d | # \n",
+  printf(" # | %-8d | %-15.15s     | %-10s | %-11s   | P: %d | # \n",
     getID(node),
     getName(node),
     dataStr,
@@ -80,8 +80,9 @@ void getSeg(s node) {
 }
 
 void showSeg(Root root) {
-  printf(" #--- ELENCO SEGNALAZIONI ---# \n");
-  printf(" # |    ID    |    CITTADINO    |    DATA    |     STATO     | U |# \n");
+  printf(" # |---------------------- ELENCO SEGNALAZIONI -------------------------| # \n");
+  printf(" # |    ID    |      CITTADINO      |    DATA    |     STATO     | U    | # \n");
+  printf(" # |--------------------------------------------------------------------| # \n");
 
   s currentSeg = getDataHead(root);
 
@@ -93,7 +94,7 @@ void showSeg(Root root) {
     limit++;
   }
 
-  printf(" #------------------------------------------------------------# \n");
+  printf(" # |--------------------------------------------------------------------| # \n");
   printf(" # Mostrate le prime 20 segnalazioni. Premi INVIO... # \n");
   getchar();
   getchar();

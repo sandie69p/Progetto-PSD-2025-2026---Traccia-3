@@ -103,7 +103,9 @@ Root init_root() {
 }
 
 void insertOnGraph(Root r, s newSeg) {
-  int prefisso = newSeg->id / 10000;
+  if (r == NULL || newSeg == NULL) return;
+
+  int prefisso = newSeg->id / 100000;
   int catIdx;
 
   switch (prefisso) {
@@ -118,6 +120,7 @@ void insertOnGraph(Root r, s newSeg) {
     case 90: catIdx = randagismo; break;
     case 11: catIdx = inquinamento; break;
     case 21: catIdx = sicurezza; break;
+    default: catIdx = -1; break;
   }
 
   if (catIdx != -1) {
@@ -157,7 +160,7 @@ void init_loadingDb(Root r, const char *fileName) {
 
 
   while (1) {
-    s nuova = (s) malloc(sizeof(struct segnalazione));
+    s nuova = (s) calloc(1, sizeof(struct segnalazione));
 
     size_t read = fread(&nuova->id, sizeof(int), 1, f);
     if (read < 1) { free(nuova); break; }
@@ -240,7 +243,7 @@ void init_sorting(Root r) {
   for(int i = n - 1; i >= 0; i--) {
     s nodo = dataSeg[i];
 
-    int prefix = (int) nodo->id / 10000;
+    int prefix = (int) nodo->id / 100000;
     int catIdx = -1;
 
     switch (prefix) {
@@ -366,7 +369,7 @@ int getState(s node) {
 }
 
 char *getData(s node) {
-  char *buffer = (char *) malloc(11 * sizeof(char));
+  char *buffer = (char *) malloc(16 * sizeof(char));
 
   int data = getRawData(node);
 
