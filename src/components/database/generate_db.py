@@ -1,9 +1,8 @@
 import struct
 import random
 
-def generate_db(n=5000):
+def generate_db(n=25000):
     # Formato C: i (int 4b), 64s (char[64]), 64s (char[64]), 1024s (char[1024]), i, i, i
-    # Escludiamo il puntatore *next che verrà gestito in RAM dal C
     fmt = "<i64s64s1024siii"
     
     categorie = {
@@ -26,23 +25,31 @@ def generate_db(n=5000):
         "Serra", "Motta", "Pellegrini", "Villa", "Farina"
     ]
     
+    # 1. Creazione dei pool di numeri univoci (da 1 a 99999) per ogni prefisso
+    # Questo garantisce l'univocità assoluta per ogni categoria
+    pools = {prefisso: list(range(1, 100000)) for prefisso in categorie.values()}
+    for prefisso in pools:
+        random.shuffle(pools[prefisso])
+    
+    print(f"Generazione di {n} segnalazioni univoche in corso...")
+
     with open("database.bin", "wb") as f:
         for _ in range(n):
             nome_cat, prefisso = random.choice(list(categorie.items()))
             
-            # ID: Prefisso + 4 cifre (SSNNNN) come intero [cite: 91]
-            id_val = int(f"{prefisso}{random.randint(1, 9999):04d}")
+            progressivo = pools[prefisso].pop()
+            
+            id_val = int(f"{prefisso}{progressivo:05d}")
             
             cittadino = f"{random.choice(nomi)} {random.choice(cognomi)}"
             via = random.choice(cognomi)
             desc = f"Problema in via {via} civico {random.randint(1, 150)}"
             
-            # Tua Data Mostro YYYYMMDD
-            data = 20260000 + (random.randint(1, 12) * 100) + random.randint(1, 28)
+            data = random.randint(2010, 2026) * 10000 + (random.randint(1, 12) * 100) + random.randint(1, 28)
             urgenza = random.randint(1, 5)
             stato = random.randint(0, 2)
             
-            # Pack binario: convertiamo le stringhe in bytes
+            # Pack binario
             record = struct.pack(fmt, 
                 id_val,
                 cittadino.encode('utf-8')[:63],
@@ -54,7 +61,7 @@ def generate_db(n=5000):
             )
             f.write(record)
 
-    print(f"Generato database.bin con {n} segnalazioni.")
+    print(f"Generato database.bin con {n} segnalazioni univoche.")
 
 if __name__ == "__main__":
     generate_db(25000)

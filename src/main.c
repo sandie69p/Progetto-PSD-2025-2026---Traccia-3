@@ -24,22 +24,7 @@ int main(void) {
   getchar();
 
   while(1) {
-    
-    printf("\033[H\033[J");
-    
-    //       ##### Interfaccia grafica - Portale consulente  #####
-    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-    printf(" #   - Numero segnalazioni comune:  %7d          # \n", getTotalSeg(sistema));
-    printf(" #   - Seagnalazioni aperte:        %7d          # \n", 7);
-    printf(" #   - Segnalazioni in risoluzione: %7d          # \n", 3);
-    printf(" #   - Segnalazioni in revisione:   %7d          # \n", 2);
-    printf(" #   - Segnalazioni chiuse:         %7d          # \n", 8);
-    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-    printf(" #   - Creare una segnalazione:           1          # \n");
-    printf(" #   - Rimuovere una segnalazione:        2          # \n");
-    printf(" #   - Segnalazioni urgenti:              0          # \n");
-    printf(" #   - Salvare ed uscire:                 0          # \n");
-    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+    dashboard(sistema);
   
     int choise;
     scanf("%d", &choise);
@@ -52,7 +37,7 @@ int main(void) {
         
       } break;
       case 3: {
-        
+        showSeg(sistema);
       } break;
       case 4: {
         

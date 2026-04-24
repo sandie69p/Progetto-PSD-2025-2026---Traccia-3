@@ -92,7 +92,7 @@ Root init_root() {
 
   for (int i = 0; i < allCat; i++) { r->id->cat[i] = NULL; r->id->nCat[i] = 0; }
   r->data->head = NULL;
-  for (int i = 0; i < 5; i ++) { r->urgenza->priority[i] = NULL; r->urgenza->priority[i] = 0; }
+  for (int i = 0; i < 5; i ++) { r->urgenza->priority[i] = NULL; r->urgenza->nPrio[i] = 0; }
   r->stato->aperto->head = NULL;
   r->stato->risoluzione->head = NULL;
   r->stato->chiuso->head = NULL;
@@ -130,12 +130,15 @@ void insertOnGraph(Root r, s newSeg) {
     if (newSeg->stato == 0) {
       newSeg->nextStato = r->stato->aperto->head;
       r->stato->aperto->head = newSeg;
+      r->stato->aperto->totAperte++;
     } else if (newSeg->stato == 1) {
       newSeg->nextStato = r->stato->risoluzione->head;
       r->stato->risoluzione->head = newSeg;
+      r->stato->risoluzione->totRis++;
     } else if (newSeg->stato == 2) {
       newSeg->nextStato = r->stato->chiuso->head;
       r->stato->chiuso->head = newSeg;
+      r->stato->chiuso->totChiuse++;
     }
 
     int urgIdx = newSeg->urgenza - 1;
@@ -233,8 +236,6 @@ void init_sorting(Root r) {
     r->id->cat[i] = NULL;
   }
 
-  
-
   // Inserimento a ritroso perche' e' l'inserimento in LIFO;
   for(int i = n - 1; i >= 0; i--) {
     s nodo = dataSeg[i];
@@ -276,6 +277,7 @@ void init_sorting(Root r) {
     if (urgIdx >= 0 && urgIdx < 5) {
       nodo->nextUrg = r->urgenza->priority[urgIdx];
       r->urgenza->priority[urgIdx] = nodo;
+      r->urgenza->nPrio[urgIdx]++;
     }
   }
 
@@ -310,12 +312,30 @@ void init_sorting(Root r) {
   free(dataSeg);
 }
 
-// Section Dashboard
+// Section Dashboard getter
 int getTotalSeg(Root root) {
   return (root != NULL) ? root->totSegnalazioni : 0;
 }
 
-/*
+int getTotalAperte(Root root) {
+  return (root != NULL) ? root->stato->aperto->totAperte : 0;
+}
+
+int getTotalRis(Root root) {
+  return (root != NULL) ? root->stato->risoluzione->totRis : 0;
+}
+
+int getTotalChiuse(Root root) {
+  return (root != NULL) ? root->stato->chiuso->totChiuse : 0;
+}
+
+int getMostUrgenti(Root root) {
+  return (root != NULL) ? root->urgenza->nPrio[4] : 0;
+}
+
+s getDataHead(Root root) {
+  return (root != NULL) ? root->data->head : NULL;
+}
 
 int getID(s node) {
   return (node != NULL) ? node->id : 0;
@@ -327,6 +347,10 @@ const char *getName(s node) {
 
 const char *getDesc(s node) {
   return (node != NULL) ? node->descrizione : "Not found";
+}
+
+const char *getCat(s node) {
+  return (node != NULL) ? node->categoria : "Not found";
 }
 
 int getRawData(s node) {
@@ -341,14 +365,28 @@ int getState(s node) {
   return (node != NULL) ? node->stato : 0;
 }
 
-void getData(s node, char *buffer) {
+char *getData(s node) {
+  char *buffer = (char *) malloc(11 * sizeof(char));
+
   int data = getRawData(node);
 
   int anno = (int) data / 10000;
   int mese = ( data % 10000 ) / 100;
   int giorno = data % 100;
 
-  sprintf(buffer, "%02d/%02d%04d", giorno, mese, anno);
+  sprintf(buffer, "%02d/%02d/%04d", giorno, mese, anno);
+
+  return buffer;
 }
 
-*/
+s nextForID(s node) {
+  return (node != NULL) ? node->nextId : NULL;
+}
+
+s nextForData(s node) {
+  return (node != NULL) ? node->nextData : NULL;
+}
+
+s nextForUrg(s node) {
+  return (node != NULL) ? node->nextUrg : NULL;
+}
