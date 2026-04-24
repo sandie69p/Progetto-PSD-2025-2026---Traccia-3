@@ -19,14 +19,17 @@ struct segnalazione {
 
 typedef struct apertoNode {
   s head;
+  int totAperte;
 } apertoNode;
 
 typedef struct risNode {
   s head;
+  int totRis;
 } risNode;
 
 typedef struct chiusoNode {
   s head;
+  int totChiuse;
 } chiusoNode;
 
 typedef enum {
@@ -46,6 +49,7 @@ typedef enum {
 
 typedef struct idNode {
   s cat[allCat];
+  int nCat[allCat];
 } idNode;
 
 typedef struct dataNode {
@@ -54,6 +58,7 @@ typedef struct dataNode {
 
 typedef struct urgNode {
   s priority[5];
+  int nPrio[5];
 } urgNode;
 
 typedef struct statoNode {
@@ -84,10 +89,10 @@ Root init_root() {
   r->stato->aperto = (apertoNode *) malloc(sizeof(apertoNode));
   r->stato->risoluzione = (risNode *) malloc(sizeof(risNode));
   r->stato->chiuso = (chiusoNode *) malloc(sizeof(chiusoNode));
-  
-  for (int i = 0; i < allCat; i++) r->id->cat[i] = NULL;
+
+  for (int i = 0; i < allCat; i++) { r->id->cat[i] = NULL; r->id->nCat[i] = 0; }
   r->data->head = NULL;
-  for (int i = 0; i < 5; i ++) r->urgenza->priority[i] = NULL;
+  for (int i = 0; i < 5; i ++) { r->urgenza->priority[i] = NULL; r->urgenza->priority[i] = 0; }
   r->stato->aperto->head = NULL;
   r->stato->risoluzione->head = NULL;
   r->stato->chiuso->head = NULL;
@@ -304,3 +309,46 @@ void init_sorting(Root r) {
 
   free(dataSeg);
 }
+
+// Section Dashboard
+int getTotalSeg(Root root) {
+  return (root != NULL) ? root->totSegnalazioni : 0;
+}
+
+/*
+
+int getID(s node) {
+  return (node != NULL) ? node->id : 0;
+}
+
+const char *getName(s node) {
+  return (node != NULL) ? node->nome_cittadino : "Not Found";
+}
+
+const char *getDesc(s node) {
+  return (node != NULL) ? node->descrizione : "Not found";
+}
+
+int getRawData(s node) {
+  return (node != NULL) ? node->data : 0;
+}
+
+int getUrg(s node) {
+  return (node != NULL) ? node->urgenza : 0;
+}
+
+int getState(s node) {
+  return (node != NULL) ? node->stato : 0;
+}
+
+void getData(s node, char *buffer) {
+  int data = getRawData(node);
+
+  int anno = (int) data / 10000;
+  int mese = ( data % 10000 ) / 100;
+  int giorno = data % 100;
+
+  sprintf(buffer, "%02d/%02d%04d", giorno, mese, anno);
+}
+
+*/

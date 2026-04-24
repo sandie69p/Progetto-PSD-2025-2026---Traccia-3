@@ -29,7 +29,7 @@ int main(void) {
     
     //       ##### Interfaccia grafica - Portale consulente  #####
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-    printf(" #   - Numero segnalazioni comune:  %7d          # \n", 20);
+    printf(" #   - Numero segnalazioni comune:  %7d          # \n", getTotalSeg(sistema));
     printf(" #   - Seagnalazioni aperte:        %7d          # \n", 7);
     printf(" #   - Segnalazioni in risoluzione: %7d          # \n", 3);
     printf(" #   - Segnalazioni in revisione:   %7d          # \n", 2);

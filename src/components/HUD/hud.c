@@ -3,8 +3,11 @@
 #include <string.h>
 #include <unistd.h> // USLEEP solo su linux
 #include "hud.h"
+#include "../components/adt/struct.h"
 
 void animazione_salvataggio() {
+  printf(" #-----Salvataggio in corso...-----------------------# \n");
+
   int lunghezza = 50;
   int i = 0;
   
@@ -24,13 +27,13 @@ void animazione_salvataggio() {
     fflush(stdout);
     usleep(50000);
   }
+
+  printf("\n #-----Uscendo ...-----------------------------------# \n");
 }
 
 void salvataggio() {
-  printf(" #-----Salvataggio in corso...-----------------------# \n");
+  // funzione da implementare free()...
   animazione_salvataggio();
-  printf("\n #-----Uscendo ...-----------------------------------# \n");
-  
   usleep(1000000);
   exit(1);
 }
