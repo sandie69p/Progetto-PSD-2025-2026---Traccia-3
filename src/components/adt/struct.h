@@ -33,4 +33,6 @@ s nextForID(s);
 s nextForData(s);
 s nextForUrg(s);
 
+void deleteGraph(Root);
+
 #endif

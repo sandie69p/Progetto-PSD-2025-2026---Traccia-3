@@ -31,11 +31,11 @@ void animazione_salvataggio() {
   printf("\n #-----Uscendo ...-----------------------------------# \n");
 }
 
-void salvataggio() {
-  // funzione da implementare free()...
+void salvataggio(Root sistema) {
+  deleteGraph(sistema);
   animazione_salvataggio();
   usleep(1000000);
-  exit(1);
+  exit(0);
 }
 
 void dashboard(Root sistema) {

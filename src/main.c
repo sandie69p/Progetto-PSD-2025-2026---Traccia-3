@@ -49,7 +49,7 @@ int main(void) {
         
       } break;
       case 0: {
-        salvataggio();
+        salvataggio(sistema);
       } break;
     }  
   }  

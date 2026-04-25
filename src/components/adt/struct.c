@@ -76,19 +76,19 @@ struct root {
 };
 
 Root init_root() {
-  Root r = (Root) malloc(sizeof(struct root));
+  Root r = (Root) calloc(1, sizeof(struct root));
   if(r == NULL) return NULL;
   
   // Inizializzo i nodi di controllo
-  r->id = (idNode *) malloc(sizeof(idNode));
-  r->data = (dataNode *) malloc(sizeof(dataNode));
-  r->urgenza = (urgNode *) malloc(sizeof(urgNode));
-  r->stato = (statoNode *) malloc(sizeof(statoNode));
+  r->id = (idNode *) calloc(1, sizeof(idNode));
+  r->data = (dataNode *) calloc(1, sizeof(dataNode));
+  r->urgenza = (urgNode *) calloc(1, sizeof(urgNode));
+  r->stato = (statoNode *) calloc(1, sizeof(statoNode));
   
   // Inizializzo i nodi di controllo di secondo livello
-  r->stato->aperto = (apertoNode *) malloc(sizeof(apertoNode));
-  r->stato->risoluzione = (risNode *) malloc(sizeof(risNode));
-  r->stato->chiuso = (chiusoNode *) malloc(sizeof(chiusoNode));
+  r->stato->aperto = (apertoNode *) calloc(1, sizeof(apertoNode));
+  r->stato->risoluzione = (risNode *) calloc(1, sizeof(risNode));
+  r->stato->chiuso = (chiusoNode *) calloc(1, sizeof(chiusoNode));
 
   for (int i = 0; i < allCat; i++) { r->id->cat[i] = NULL; r->id->nCat[i] = 0; }
   r->data->head = NULL;
@@ -290,6 +290,9 @@ void init_sorting(Root r) {
   r->stato->aperto->head = NULL;
   r->stato->chiuso->head = NULL;
   r->stato->risoluzione->head = NULL;
+  r->stato->aperto->totAperte = 0;
+  r->stato->risoluzione->totRis = 0;
+  r->stato->chiuso->totChiuse = 0;
 
   for (int i = n - 1; i >= 0; i--) {
     s nodo = dataSeg[i];
@@ -298,16 +301,19 @@ void init_sorting(Root r) {
       case 0: {
         nodo->nextStato = r->stato->aperto->head;
         r->stato->aperto->head = nodo;
+        r->stato->aperto->totAperte++;
       } break;
       
       case 1: {
         nodo->nextStato = r->stato->risoluzione->head;
         r->stato->risoluzione->head = nodo;
+        r->stato->risoluzione->totRis++;
       } break;
 
       case 2: {
         nodo->nextStato = r->stato->chiuso->head;
         r->stato->chiuso->head = nodo;
+        r->stato->chiuso->totChiuse++;
       } break;
     }
   }
@@ -392,4 +398,32 @@ s nextForData(s node) {
 
 s nextForUrg(s node) {
   return (node != NULL) ? node->nextUrg : NULL;
+}
+
+void deleteGraph(Root root) {
+  if (root == NULL || root->data == NULL) return;
+
+  s currNode = root->data->head;
+  s nextNode;
+
+  while (currNode != NULL) {
+  	nextNode = currNode->nextData;
+
+  	free(currNode);
+
+  	currNode = nextNode;
+  }
+
+  free(root->id);
+  free(root->data);
+  
+  if (root->stato) {
+  	free(root->stato->aperto);
+  	free(root->stato->risoluzione);
+  	free(root->stato->chiuso);
+  } free(root->stato);
+  
+  free(root->urgenza);
+
+  free(root);
 }
