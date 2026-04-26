@@ -547,8 +547,8 @@ void getNewSeg(Root root) {
   if (newSeg == NULL) return;
 
   printf("Seleziona una Categoria: \n");
-  printf("1) Illuminazione\n2) Rifiuti\n3) Strade\n4) Verde\n5) Incendio\n6) Allagamento\n7) Segnaletica\n8) Edilizia\n9) Randagismo\n10) Inquinamento\n11) Sicurezza");
-  printf("Scelta: ");
+  printf(" # 1) Illuminazione\n # 2) Rifiuti\n # 3) Strade\n # 4) Verde\n # 5) Incendio\n # 6) Allagamento\n # 7) Segnaletica\n # 8) Edilizia\n # 9) Randagismo\n # 10) Inquinamento\n # 11) Sicurezza\n");
+  printf(" # Scelta: ");
   scanf("%d", &scelta);
   getchar();
 
