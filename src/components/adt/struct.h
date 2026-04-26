@@ -33,6 +33,8 @@ s nextForID(s);
 s nextForData(s);
 s nextForUrg(s);
 
+void getNewSeg(Root);
+
 void deleteGraph(Root);
 
 #endif

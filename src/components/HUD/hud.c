@@ -80,6 +80,8 @@ void getSeg(s node) {
 }
 
 void showSeg(Root root) {
+  printf("\033[H\033[J");
+
   printf(" # |---------------------- ELENCO SEGNALAZIONI -------------------------| # \n");
   printf(" # |    ID    |      CITTADINO      |    DATA    |     STATO     | U    | # \n");
   printf(" # |--------------------------------------------------------------------| # \n");
@@ -96,6 +98,9 @@ void showSeg(Root root) {
 
   printf(" # |--------------------------------------------------------------------| # \n");
   printf(" # Mostrate le prime 20 segnalazioni. Premi INVIO... # \n");
-  getchar();
-  getchar();
+  getchar(); getchar();
+}
+
+void insertNewSeg(Root root) {
+  getNewSeg(root);
 }

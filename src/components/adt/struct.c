@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "./struct.h"
 
 struct segnalazione {
@@ -158,19 +159,21 @@ void init_loadingDb(Root r, const char *fileName) {
   FILE *f = fopen(fileName, "rb");
   if (f == NULL) { perror("Errore apertura file"); return; }
 
-
   while (1) {
     s nuova = (s) calloc(1, sizeof(struct segnalazione));
+    if (!nuova) { fclose(f); return; }
 
-    size_t read = fread(&nuova->id, sizeof(int), 1, f);
-    if (read < 1) { free(nuova); break; }
+    if (fread(&nuova->id, sizeof(int), 1, f) != 1) {
+      free(nuova);
+      break;
+    }
 
-    fread(nuova->nome_cittadino, sizeof(char), 64, f);
-    fread(nuova->categoria, sizeof(char), 64, f);
-    fread(nuova->descrizione, sizeof(char), 1024, f);
-    fread(&nuova->data, sizeof(int), 1, f);
-    fread(&nuova->urgenza, sizeof(int), 1, f);
-    fread(&nuova->stato, sizeof(int), 1, f);
+    if (fread(nuova->nome_cittadino, sizeof(char), 64, f) != 64) { free(nuova); break; }
+    if (fread(nuova->categoria, sizeof(char), 64, f) != 64) { free(nuova); break; }
+    if (fread(nuova->descrizione, sizeof(char), 1024, f) != 1024) { free(nuova); break; }
+    if (fread(&nuova->data, sizeof(int), 1, f) != 1) { free(nuova); break; }
+    if (fread(&nuova->urgenza, sizeof(int), 1, f) != 1) { free(nuova); break; }
+    if (fread(&nuova->stato, sizeof(int), 1, f) != 1) { free(nuova); break; }
 
     nuova->nextId = NULL;
     nuova->nextData = NULL;
@@ -179,6 +182,8 @@ void init_loadingDb(Root r, const char *fileName) {
 
     insertOnGraph(r, nuova);
   }
+
+  fclose(f);
 }
 
 void quicksort(s *arr, int low, int high, int type) {
@@ -215,12 +220,16 @@ void quicksort(s *arr, int low, int high, int type) {
 }
 
 void init_sorting(Root r) {
-  int n = r->totSegnalazioni;
+  if (r == NULL) return;
 
-  s *dataSeg = malloc(n * sizeof(s));
+  int n = r->totSegnalazioni;
+  if (n == 0) return;
+
+  s *dataSeg = calloc(n, sizeof(s));
+  if (dataSeg == NULL) return;
 
   s curr = r->data->head;
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n && curr != NULL; i++) {
     dataSeg[i] = curr;
     curr = curr->nextData;
   }
@@ -271,6 +280,7 @@ void init_sorting(Root r) {
   
   for (int i = 0; i < 5; i++) {
     r->urgenza->priority[i] = NULL;
+    r->urgenza->nPrio[i] = 0;
   }
 
   for (int i = n - 1; i >= 0; i--) {
@@ -426,4 +436,159 @@ void deleteGraph(Root root) {
   free(root->urgenza);
 
   free(root);
+}
+
+int getRandomId(Root root, int prefix, int catIdx) {
+  int maxNum = 100000;
+  int id;  
+  bool duplicato = false;
+  
+  do {
+    duplicato = 0;
+    id = (prefix * 100000) + (rand() % maxNum);
+
+    s currSeg = root->id->cat[catIdx];
+
+    while (currSeg != NULL) {
+      if(currSeg->id == id) {
+        duplicato = true;
+        break;
+      }
+      currSeg = currSeg->nextId;
+    }
+
+  } while (duplicato);
+
+  return id;
+}
+
+void appendNewSeg(s newSeg, const char *fileName) {
+  if (newSeg == NULL) return;
+
+  FILE *f = fopen(fileName, "ab");
+  if (f == NULL) { perror("Errore nell'apertura!"); return; }
+
+  fwrite(&newSeg->id, sizeof(int), 1, f);
+  fwrite(newSeg->nome_cittadino, sizeof(char), 64, f);
+  fwrite(newSeg->categoria, sizeof(char), 64, f);
+  fwrite(newSeg->descrizione, sizeof(char), 1024, f);
+  fwrite(&newSeg->data, sizeof(int), 1, f);
+  fwrite(&newSeg->urgenza, sizeof(int), 1, f);
+  fwrite(&newSeg->stato, sizeof(int), 1, f);
+
+  fclose(f);
+
+  printf("[FILE] Segnalazione registrata con successo!");
+}
+
+void getPosition(Root root, s newSeg, int catIdx) {
+  if (root == NULL || newSeg == NULL) return;
+  if (catIdx < 0 || catIdx >= allCat) return;
+
+  // ordinamento di data
+  if(root->data->head == NULL || newSeg->data < root->data->head->data) {
+    newSeg->nextData = root->data->head;
+    root->data->head = newSeg;
+  } else {
+    s currSeg = root->data->head;
+
+    while (currSeg->nextData != NULL && currSeg->nextData->data <= newSeg->data) {
+      currSeg = currSeg->nextData;
+    }
+
+    newSeg->nextData = currSeg->nextData;
+    currSeg->nextData = newSeg;
+  }
+
+  // ordinameto di id
+  s headCat = root->id->cat[catIdx];
+
+  if(headCat == NULL || newSeg->id < headCat->id) {
+    newSeg->nextId = headCat;
+    root->id->cat[catIdx] = newSeg;
+  } else {
+    s currSeg = headCat;
+    while (currSeg->nextId != NULL && currSeg->nextId->id <= newSeg->id) {
+      currSeg = currSeg->nextId;
+    }
+    newSeg->nextId = currSeg->nextId;
+    currSeg->nextId = newSeg;
+  }
+
+  if (newSeg->stato == 0) { // Aperto
+      newSeg->nextStato = root->stato->aperto->head;
+      root->stato->aperto->head = newSeg;
+      root->stato->aperto->totAperte++;
+  } else if (newSeg->stato == 1) { // In risoluzione
+      newSeg->nextStato = root->stato->risoluzione->head;
+      root->stato->risoluzione->head = newSeg;
+      root->stato->risoluzione->totRis++;
+  } else { // Chiuso
+      newSeg->nextStato = root->stato->chiuso->head;
+      root->stato->chiuso->head = newSeg;
+      root->stato->chiuso->totChiuse++;
+  }
+
+  int urgIdx = newSeg->urgenza - 1;
+  
+  if (urgIdx >= 0 && urgIdx < 5) {
+    newSeg->nextUrg = root->urgenza->priority[urgIdx];
+    root->urgenza->priority[urgIdx] = newSeg;
+    root->urgenza->nPrio[urgIdx]++;
+  }
+
+  root->totSegnalazioni++;
+}
+
+void getNewSeg(Root root) {
+  int giorno, mese, anno, scelta;
+
+  s newSeg = (s) calloc(1, sizeof(struct segnalazione));
+  if (newSeg == NULL) return;
+
+  printf("Seleziona una Categoria: \n");
+  printf("1) Illuminazione\n2) Rifiuti\n3) Strade\n4) Verde\n5) Incendio\n6) Allagamento\n7) Segnaletica\n8) Edilizia\n9) Randagismo\n10) Inquinamento\n11) Sicurezza");
+  printf("Scelta: ");
+  scanf("%d", &scelta);
+  getchar();
+
+  int catIdx = scelta - 1;
+  int prefix = 0;
+
+  switch (catIdx) {
+    case illuminazione: prefix = 10; strcpy(newSeg->categoria, "Illuminazione"); break;
+    case rifiuti: prefix = 20; strcpy(newSeg->categoria, "Rifiuti"); break;
+    case strade: prefix = 30; strcpy(newSeg->categoria, "Strade"); break;
+    case verde: prefix = 40; strcpy(newSeg->categoria, "Verde"); break;
+    case incendio: prefix = 50; strcpy(newSeg->categoria, "Incendio"); break;
+    case allagamento: prefix = 60; strcpy(newSeg->categoria, "Allagamento"); break;
+    case segnaletica: prefix = 70; strcpy(newSeg->categoria, "Segnaletica"); break;
+    case edilizia: prefix = 80; strcpy(newSeg->categoria, "Edilizia"); break;
+    case randagismo: prefix = 90; strcpy(newSeg->categoria, "Randagismo"); break;
+    case inquinamento: prefix = 11; strcpy(newSeg->categoria, "Inquinamento"); break;
+    case sicurezza: prefix = 21; strcpy(newSeg->categoria, "Sicurezza"); break;
+    default: prefix = 0; break;
+  }
+
+  newSeg->id = getRandomId(root, prefix, catIdx);
+
+  printf("Nome del cittadino: ");
+  fgets(newSeg->nome_cittadino, 64, stdin);
+  newSeg->nome_cittadino[strcspn(newSeg->nome_cittadino, "\n")] = 0;
+
+  printf("Inserisci descrizione: ");
+  fgets(newSeg->descrizione, 1024, stdin);
+  newSeg->descrizione[strcspn(newSeg->descrizione, "\n")] = 0;
+
+  printf("Inserisci data (DD/MM/AAAA) : "); // aggiungere placeholder
+  scanf("%d/%d/%d", &giorno, &mese, &anno);
+  getchar();
+  newSeg->data = anno * 10000 + mese * 100 + giorno;
+
+  // momentaneo
+  newSeg->urgenza = 3;
+  newSeg->stato = 0;
+
+  getPosition(root, newSeg, catIdx);
+  appendNewSeg(newSeg, "./components/database/database.bin");
 }

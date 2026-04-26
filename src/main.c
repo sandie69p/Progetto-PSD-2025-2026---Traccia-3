@@ -31,7 +31,7 @@ int main(void) {
     
     switch(choise) {
       case 1: {
-        
+        insertNewSeg(sistema);        
       } break;
       case 2: {
         

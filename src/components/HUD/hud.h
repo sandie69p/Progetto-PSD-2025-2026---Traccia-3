@@ -3,8 +3,10 @@
 
 #include "../adt/struct.h"
 
+void insertNewSeg(Root);
 void dashboard(Root);
 void showSeg(Root);
-void salvataggio();
+void salvataggio(Root);
+
 
 #endif
