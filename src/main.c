@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+
 #include "./components/HUD/hud.h"
 #include "./components/adt/struct.h"
 
@@ -27,6 +28,7 @@ int main(void) {
     dashboard(sistema);
   
     int choise;
+    printf(" #     ");
     scanf("%d", &choise);
     
     switch(choise) {

@@ -110,18 +110,53 @@ void insertOnGraph(Root r, s newSeg) {
   int catIdx;
 
   switch (prefisso) {
-    case 10: catIdx = illuminazione; break;
-    case 20: catIdx = rifiuti; break;
-    case 30: catIdx = strade; break;
-    case 40: catIdx = verde; break;
-    case 50: catIdx = incendio; break;
-    case 60: catIdx = allagamento; break;
-    case 70: catIdx = segnaletica; break;
-    case 80: catIdx = edilizia; break;
-    case 90: catIdx = randagismo; break;
-    case 11: catIdx = inquinamento; break;
-    case 21: catIdx = sicurezza; break;
-    default: catIdx = -1; break;
+    case 10: { 
+      catIdx = illuminazione; 
+    } break;
+
+    case 20: { 
+      catIdx = rifiuti; 
+    } break;
+
+    case 30: { 
+      catIdx = strade; 
+    } break;
+
+    case 40: { 
+      catIdx = verde; 
+    } break;
+
+    case 50: { 
+      catIdx = incendio; 
+    } break;
+
+    case 60: {
+      catIdx = allagamento; 
+    } break;
+
+    case 70: { 
+      catIdx = segnaletica; 
+    } break;
+
+    case 80: { 
+      catIdx = edilizia; 
+    } break;
+
+    case 90: { 
+      catIdx = randagismo; 
+    } break;
+
+    case 11: { 
+      catIdx = inquinamento; 
+    } break;
+
+    case 21: {
+      catIdx = sicurezza; 
+    } break;
+
+    default: { 
+      catIdx = -1; 
+    } break;
   }
 
   if (catIdx != -1) {
@@ -168,12 +203,35 @@ void init_loadingDb(Root r, const char *fileName) {
       break;
     }
 
-    if (fread(nuova->nome_cittadino, sizeof(char), 64, f) != 64) { free(nuova); break; }
-    if (fread(nuova->categoria, sizeof(char), 64, f) != 64) { free(nuova); break; }
-    if (fread(nuova->descrizione, sizeof(char), 1024, f) != 1024) { free(nuova); break; }
-    if (fread(&nuova->data, sizeof(int), 1, f) != 1) { free(nuova); break; }
-    if (fread(&nuova->urgenza, sizeof(int), 1, f) != 1) { free(nuova); break; }
-    if (fread(&nuova->stato, sizeof(int), 1, f) != 1) { free(nuova); break; }
+    if (fread(nuova->nome_cittadino, sizeof(char), 64, f) != 64) {
+      free(nuova); 
+      break; 
+    }
+
+    if (fread(nuova->categoria, sizeof(char), 64, f) != 64) { 
+      free(nuova); 
+      break; 
+    }
+
+    if (fread(nuova->descrizione, sizeof(char), 1024, f) != 1024) { 
+      free(nuova); 
+      break; 
+    }
+
+    if (fread(&nuova->data, sizeof(int), 1, f) != 1) { 
+      free(nuova); 
+      break; 
+    }
+
+    if (fread(&nuova->urgenza, sizeof(int), 1, f) != 1) { 
+      free(nuova); 
+      break; 
+    }
+
+    if (fread(&nuova->stato, sizeof(int), 1, f) != 1) { 
+      free(nuova); 
+      break; 
+    }
 
     nuova->nextId = NULL;
     nuova->nextData = NULL;
@@ -195,10 +253,21 @@ void quicksort(s *arr, int low, int high, int type) {
       int condition = 0;
 
       switch (type) {
-        case 1: condition = (arr[j]->data < pivot->data); break;
-        case 2: condition = (arr[j]->id < pivot->id); break;
-        case 3: condition = (arr[j]->urgenza < pivot->urgenza); break;
-        case 4: condition = (arr[j]->stato < pivot->stato); break;
+        case 1: { 
+          condition = (arr[j]->data < pivot->data); 
+        } break;
+
+        case 2: {
+          condition = (arr[j]->id < pivot->id);
+        } break;
+
+        case 3: {
+          condition = (arr[j]->urgenza < pivot->urgenza); 
+        } break;
+
+        case 4: {
+          condition = (arr[j]->stato < pivot->stato); 
+        } break;
       }
 
       if (condition) {
@@ -256,17 +325,49 @@ void init_sorting(Root r) {
     int catIdx = -1;
 
     switch (prefix) {
-      case 10: catIdx = illuminazione; break;
-      case 20: catIdx = rifiuti; break;
-      case 30: catIdx = strade; break;
-      case 40: catIdx = verde; break;
-      case 50: catIdx = incendio; break;
-      case 60: catIdx = allagamento; break;
-      case 70: catIdx = segnaletica; break;
-      case 80: catIdx = edilizia; break;
-      case 90: catIdx = randagismo; break;
-      case 11: catIdx = inquinamento; break;
-      case 21: catIdx = sicurezza; break;
+      case 10: { 
+        catIdx = illuminazione; 
+      } break;
+
+      case 20: { 
+        catIdx = rifiuti; 
+      } break;
+
+      case 30: { 
+        catIdx = strade; 
+      } break;
+
+      case 40: { 
+        catIdx = verde; 
+      } break;
+
+      case 50: { 
+        catIdx = incendio; 
+      } break;
+
+      case 60: {
+        catIdx = allagamento; 
+      } break;
+
+      case 70: { 
+        catIdx = segnaletica; 
+      } break;
+
+      case 80: { 
+        catIdx = edilizia; 
+      } break;
+
+      case 90: { 
+        catIdx = randagismo; 
+      } break;
+
+      case 11: { 
+        catIdx = inquinamento; 
+      } break;
+
+      case 21: {
+        catIdx = sicurezza; 
+      } break;
     }
 
     if(catIdx != -1) {
@@ -300,6 +401,7 @@ void init_sorting(Root r) {
   r->stato->aperto->head = NULL;
   r->stato->chiuso->head = NULL;
   r->stato->risoluzione->head = NULL;
+
   r->stato->aperto->totAperte = 0;
   r->stato->risoluzione->totRis = 0;
   r->stato->chiuso->totChiuse = 0;
@@ -556,18 +658,52 @@ void getNewSeg(Root root) {
   int prefix = 0;
 
   switch (catIdx) {
-    case illuminazione: prefix = 10; strcpy(newSeg->categoria, "Illuminazione"); break;
-    case rifiuti: prefix = 20; strcpy(newSeg->categoria, "Rifiuti"); break;
-    case strade: prefix = 30; strcpy(newSeg->categoria, "Strade"); break;
-    case verde: prefix = 40; strcpy(newSeg->categoria, "Verde"); break;
-    case incendio: prefix = 50; strcpy(newSeg->categoria, "Incendio"); break;
-    case allagamento: prefix = 60; strcpy(newSeg->categoria, "Allagamento"); break;
-    case segnaletica: prefix = 70; strcpy(newSeg->categoria, "Segnaletica"); break;
-    case edilizia: prefix = 80; strcpy(newSeg->categoria, "Edilizia"); break;
-    case randagismo: prefix = 90; strcpy(newSeg->categoria, "Randagismo"); break;
-    case inquinamento: prefix = 11; strcpy(newSeg->categoria, "Inquinamento"); break;
-    case sicurezza: prefix = 21; strcpy(newSeg->categoria, "Sicurezza"); break;
-    default: prefix = 0; break;
+    case illuminazione: {
+      prefix = 10; strcpy(newSeg->categoria, "Illuminazione"); 
+    } break;
+
+    case rifiuti: { 
+      prefix = 20; strcpy(newSeg->categoria, "Rifiuti"); 
+    } break;
+
+    case strade: { 
+      prefix = 30; strcpy(newSeg->categoria, "Strade"); 
+    } break;
+
+    case verde: { 
+      prefix = 40; strcpy(newSeg->categoria, "Verde"); 
+    } break;
+
+    case incendio: { 
+      prefix = 50; strcpy(newSeg->categoria, "Incendio"); 
+    } break;
+
+    case allagamento: { 
+      prefix = 60; strcpy(newSeg->categoria, "Allagamento"); 
+    } break;
+
+    case segnaletica: { 
+      prefix = 70; strcpy(newSeg->categoria, "Segnaletica"); 
+    } break;
+
+    case edilizia: { 
+      prefix = 80; strcpy(newSeg->categoria, "Edilizia"); 
+    } break;
+
+    case randagismo: { 
+      prefix = 90; strcpy(newSeg->categoria, "Randagismo"); 
+    } break;
+    case inquinamento: { 
+      prefix = 11; strcpy(newSeg->categoria, "Inquinamento"); 
+    } break;
+
+    case sicurezza: { 
+      prefix = 21; strcpy(newSeg->categoria, "Sicurezza"); 
+    } break;
+
+    default: { 
+      prefix = 0; 
+    } break;
   }
 
   newSeg->id = getRandomId(root, prefix, catIdx);

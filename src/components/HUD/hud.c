@@ -5,6 +5,12 @@
 #include "hud.h"
 #include "../adt/struct.h"
 
+void intestation() {
+  printf(" # |---------------------- ELENCO SEGNALAZIONI -------------------------| # \n");
+  printf(" # |    ID    |      CITTADINO      |    DATA    |     STATO     | U    | # \n");
+  printf(" # |--------------------------------------------------------------------| # \n");
+}
+
 void animazione_salvataggio() {
   printf(" #-----Salvataggio in corso...-----------------------# \n");
 
@@ -63,9 +69,16 @@ void getSeg(s node) {
   const char *statoStr;
 
   switch(getState(node)) {
-    case 0: statoStr = "Aperta"; break;
-    case 1: statoStr = "Risoluzione"; break;
-    case 2: statoStr = "Chiusa"; break;
+    case 0: { statoStr = "Aperta"; 
+    } break;
+
+    case 1: { 
+      statoStr = "Risoluzione"; 
+    } break;
+
+    case 2: {
+      statoStr = "Chiusa"; 
+    } break;
   }
 
   printf(" # | %-8d | %-15.15s     | %-10s | %-11s   | P: %d | # \n",
@@ -82,9 +95,7 @@ void getSeg(s node) {
 void showSeg(Root root) {
   printf("\033[H\033[J");
 
-  printf(" # |---------------------- ELENCO SEGNALAZIONI -------------------------| # \n");
-  printf(" # |    ID    |      CITTADINO      |    DATA    |     STATO     | U    | # \n");
-  printf(" # |--------------------------------------------------------------------| # \n");
+  intestation();
 
   s currentSeg = getDataHead(root);
 

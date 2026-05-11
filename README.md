@@ -44,7 +44,7 @@ The project is built on modern software engineering principles, focusing on **sc
 
 ## 📜 Licensing
 
-This project is released under the **MIT License**.
+This project is released under the **GNU AFFERO GENERAL PUBLIC LICENSE**.
 
 ---
-*Generated for the University Project - Digital Systems Design course.*
+*Created for the University Project - Digital Systems Design course.*
