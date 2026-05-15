@@ -10,6 +10,7 @@ typedef struct segnalazione *s;
 Root init_root();
 void init_loadingDb(Root, const char *);
 void init_sorting(Root);
+void init_removeSeg(Root, int);
 
 // Funzioni di getter globali
 int getTotalSeg(Root);
@@ -34,7 +35,7 @@ s nextForData(s);
 s nextForUrg(s);
 
 void getNewSeg(Root);
-
+void save_records(Root);
 void deleteGraph(Root);
 
 #endif

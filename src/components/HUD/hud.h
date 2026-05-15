@@ -7,6 +7,7 @@ void insertNewSeg(Root);
 void dashboard(Root);
 void showSeg(Root);
 void salvataggio(Root);
+void removeSeg(Root);
 
 
 #endif

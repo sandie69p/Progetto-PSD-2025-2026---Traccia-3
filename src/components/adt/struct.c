@@ -298,17 +298,23 @@ void init_sorting(Root r) {
   if (dataSeg == NULL) return;
 
   s curr = r->data->head;
+  
   for (int i = 0; i < n && curr != NULL; i++) {
     dataSeg[i] = curr;
     curr = curr->nextData;
+
   }
 
   quicksort(dataSeg, 0, n - 1, 1);
 
   r->data->head = dataSeg[0];
+
   for (int i = 0; i < n - 1; i++) {
     dataSeg[i]->nextData = dataSeg[i+1];
-  } dataSeg[n-1]->nextData = NULL;
+
+  }
+  
+  dataSeg[n-1]->nextData = NULL;
 
   // Inizio ordinamento id per categoria
   quicksort(dataSeg, 0, n - 1, 2);
@@ -373,6 +379,7 @@ void init_sorting(Root r) {
     if(catIdx != -1) {
       nodo->nextId = r->id->cat[catIdx];
       r->id->cat[catIdx] = nodo;
+
     }
   }
 
@@ -382,6 +389,7 @@ void init_sorting(Root r) {
   for (int i = 0; i < 5; i++) {
     r->urgenza->priority[i] = NULL;
     r->urgenza->nPrio[i] = 0;
+
   }
 
   for (int i = n - 1; i >= 0; i--) {
@@ -392,6 +400,7 @@ void init_sorting(Root r) {
       nodo->nextUrg = r->urgenza->priority[urgIdx];
       r->urgenza->priority[urgIdx] = nodo;
       r->urgenza->nPrio[urgIdx]++;
+
     }
   }
 
@@ -533,8 +542,9 @@ void deleteGraph(Root root) {
   	free(root->stato->aperto);
   	free(root->stato->risoluzione);
   	free(root->stato->chiuso);
-  } free(root->stato);
-  
+  } 
+
+  free(root->stato);
   free(root->urgenza);
 
   free(root);
@@ -542,7 +552,8 @@ void deleteGraph(Root root) {
 
 int getRandomId(Root root, int prefix, int catIdx) {
   int maxNum = 100000;
-  int id;  
+  int id;
+
   bool duplicato = false;
   
   do {
@@ -591,6 +602,7 @@ void getPosition(Root root, s newSeg, int catIdx) {
   if(root->data->head == NULL || newSeg->data < root->data->head->data) {
     newSeg->nextData = root->data->head;
     root->data->head = newSeg;
+
   } else {
     s currSeg = root->data->head;
 
@@ -608,11 +620,14 @@ void getPosition(Root root, s newSeg, int catIdx) {
   if(headCat == NULL || newSeg->id < headCat->id) {
     newSeg->nextId = headCat;
     root->id->cat[catIdx] = newSeg;
+
   } else {
     s currSeg = headCat;
+
     while (currSeg->nextId != NULL && currSeg->nextId->id <= newSeg->id) {
       currSeg = currSeg->nextId;
     }
+
     newSeg->nextId = currSeg->nextId;
     currSeg->nextId = newSeg;
   }
@@ -621,14 +636,17 @@ void getPosition(Root root, s newSeg, int catIdx) {
       newSeg->nextStato = root->stato->aperto->head;
       root->stato->aperto->head = newSeg;
       root->stato->aperto->totAperte++;
+
   } else if (newSeg->stato == 1) { // In risoluzione
       newSeg->nextStato = root->stato->risoluzione->head;
       root->stato->risoluzione->head = newSeg;
       root->stato->risoluzione->totRis++;
+
   } else { // Chiuso
       newSeg->nextStato = root->stato->chiuso->head;
       root->stato->chiuso->head = newSeg;
       root->stato->chiuso->totChiuse++;
+
   }
 
   int urgIdx = newSeg->urgenza - 1;
@@ -637,6 +655,7 @@ void getPosition(Root root, s newSeg, int catIdx) {
     newSeg->nextUrg = root->urgenza->priority[urgIdx];
     root->urgenza->priority[urgIdx] = newSeg;
     root->urgenza->nPrio[urgIdx]++;
+
   }
 
   root->totSegnalazioni++;
@@ -693,6 +712,7 @@ void getNewSeg(Root root) {
     case randagismo: { 
       prefix = 90; strcpy(newSeg->categoria, "Randagismo"); 
     } break;
+
     case inquinamento: { 
       prefix = 11; strcpy(newSeg->categoria, "Inquinamento"); 
     } break;
@@ -727,4 +747,135 @@ void getNewSeg(Root root) {
 
   getPosition(root, newSeg, catIdx);
   appendNewSeg(newSeg, "./components/database/database.bin");
+}
+
+void init_removeSeg(Root r, int idTarget) {
+  if (!r) return;
+
+  int prefisso = idTarget / 100000;
+  int catIdx = -1;
+
+  switch (prefisso) {
+    case 10: { 
+      catIdx = illuminazione; 
+    } break;
+
+    case 20: { 
+      catIdx = rifiuti; 
+    } break;
+
+    case 30: { 
+      catIdx = strade; 
+    } break;
+
+    case 40: { 
+      catIdx = verde; 
+    } break;
+
+    case 50: { 
+      catIdx = incendio; 
+    } break;
+
+    case 60: {
+      catIdx = allagamento; 
+    } break;
+
+    case 70: { 
+      catIdx = segnaletica; 
+    } break;
+
+    case 80: { 
+      catIdx = edilizia; 
+    } break;
+
+    case 90: { 
+      catIdx = randagismo; 
+    } break;
+
+    case 11: { 
+      catIdx = inquinamento; 
+    } break;
+
+    case 21: {
+      catIdx = sicurezza; 
+    } break;
+  }
+
+  s curr = r->id->cat[catIdx];
+  s prev = NULL;
+
+  while (curr && curr->id != idTarget) {
+    prev = curr;
+    curr = curr->nextId;
+  }
+
+  if (!curr) {
+    printf("Segnalazione %d non trovata.\n", idTarget);
+    return;
+  }
+
+  if (!prev) r->id->cat[catIdx] = curr->nextId;
+  else prev->nextId = curr->nextId;
+
+  s currD = r->data->head;
+  s prevD = NULL;
+  while (currD && currD->id != idTarget) {
+    prevD = currD;
+    currD = currD->nextData;
+  }
+  if (currD) {
+    if (!prevD) r->data->head = currD->nextData;
+    else prevD->nextData = currD->nextData;
+  }
+
+  int p = curr->urgenza - 1; 
+  s currU = r->urgenza->priority[p];
+  s prevU = NULL;
+
+  while (currU && currU->id != idTarget) {
+    prevU = currU;
+    currU = currU->nextUrg;
+  }
+
+  if (currU) {
+    if (!prevU) 
+      r->urgenza->priority[p] = currU->nextUrg;
+    else 
+      prevU->nextUrg = currU->nextUrg;
+      
+    r->urgenza->nPrio[p]--;
+  }
+
+  r->id->nCat[catIdx]--;
+  r->totSegnalazioni--;
+  
+  if (curr->stato == 0) 
+    r->stato->aperto->totAperte--;
+
+  else if (curr->stato == 1) 
+    r->stato->risoluzione->totRis--;
+
+  else if (curr->stato == 2) 
+    r->stato->chiuso->totChiuse--;
+
+  free(curr);
+  printf(" #     Segnalazione %d rimossa con successo.\n", idTarget);
+}
+
+void save_records(Root r) {
+    FILE *f = fopen("./components/database/database.bin", "wb");
+    if (!f) return;
+
+    s curr = r->data->head;
+    while (curr) {
+      fwrite(&(curr->id), sizeof(int), 1, f);
+      fwrite(curr->nome_cittadino, 64, 1, f);
+      fwrite(curr->categoria, 64, 1, f);
+      fwrite(curr->descrizione, 1024, 1, f);
+      fwrite(&(curr->data), sizeof(int), 1, f);
+      fwrite(&(curr->urgenza), sizeof(int), 1, f);
+      fwrite(&(curr->stato), sizeof(int), 1, f);
+      curr = curr->nextData;
+    }
+    fclose(f);
 }

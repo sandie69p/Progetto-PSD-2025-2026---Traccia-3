@@ -13,7 +13,7 @@ int main(void) {
   if (sistema == NULL) return 1;
 
   clock_t start = clock();
-  printf("Caricamento di 25000 segnalazioni in corso... \n");
+  printf("Caricamento delle segnalazioni in corso... \n");
   init_loadingDb(sistema, "./components/database/database.bin");
   init_sorting(sistema);
   clock_t end = clock();
@@ -36,7 +36,7 @@ int main(void) {
         insertNewSeg(sistema);        
       } break;
       case 2: {
-        
+        removeSeg(sistema);
       } break;
       case 3: {
         showSeg(sistema);

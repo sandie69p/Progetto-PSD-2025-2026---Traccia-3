@@ -38,6 +38,7 @@ void animazione_salvataggio() {
 }
 
 void salvataggio(Root sistema) {
+  save_records(sistema);
   deleteGraph(sistema);
   animazione_salvataggio();
   usleep(1000000);
@@ -114,4 +115,14 @@ void showSeg(Root root) {
 
 void insertNewSeg(Root root) {
   getNewSeg(root);
+}
+
+void removeSeg(Root root) {
+  printf("# Rimuovi la segnalazione usando l'id: ");
+  
+  int idTarget;
+  scanf("%d", &idTarget);
+  getchar();
+
+  init_removeSeg(root, idTarget);
 }
