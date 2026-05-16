@@ -810,7 +810,7 @@ void init_removeSeg(Root r, int idTarget) {
   }
 
   if (!curr) {
-    printf("Segnalazione %d non trovata.\n", idTarget);
+    printf(" #   - Segnalazione %d non trovata.\n", idTarget);
     return;
   }
 
@@ -859,7 +859,7 @@ void init_removeSeg(Root r, int idTarget) {
     r->stato->chiuso->totChiuse--;
 
   free(curr);
-  printf(" #     Segnalazione %d rimossa con successo.\n", idTarget);
+  printf(" #   - Segnalazione %d rimossa con successo.\n", idTarget);
 }
 
 void save_records(Root r) {
@@ -878,4 +878,93 @@ void save_records(Root r) {
       curr = curr->nextData;
     }
     fclose(f);
+}
+
+void search_seg(Root r, const char *searchString) {
+  if (!r || !searchString) return;
+
+  int len = strlen(searchString);
+  int catIdx = -1;
+
+  if (len >= 2) {
+    char prefixStr[3] = {
+      searchString[0],
+      searchString[1],
+      '\0'
+    };
+    int prefisso = atoi(prefixStr);
+
+    switch (prefisso) {
+      case 10: { 
+        catIdx = illuminazione; 
+      } break;
+
+      case 20: { 
+        catIdx = rifiuti; 
+      } break;
+
+      case 30: { 
+        catIdx = strade; 
+      } break;
+
+      case 40: { 
+        catIdx = verde; 
+      } break;
+
+      case 50: { 
+        catIdx = incendio; 
+      } break;
+
+      case 60: {
+        catIdx = allagamento; 
+      } break;
+
+      case 70: { 
+        catIdx = segnaletica; 
+      } break;
+
+      case 80: { 
+        catIdx = edilizia; 
+      } break;
+
+      case 90: { 
+        catIdx = randagismo; 
+      } break;
+
+      case 11: { 
+        catIdx = inquinamento; 
+      } break;
+
+      case 21: {
+        catIdx = sicurezza; 
+      } break;
+    }
+  }
+
+  int trovati = 0;
+  char idStr[20];
+
+  s curr = (catIdx == -1) ? r->data->head : r->id->cat[catIdx];
+
+  while (curr && trovati < 12) {
+    sprintf(idStr, "%d", curr->id);
+
+    if(strncmp(idStr, searchString, len) == 0) {
+      const char *statoStr = (curr->stato == 0) ? "Aperta" : (curr->stato == 1) ? "Risoluzione" : "Chiusa";
+      printf(" # | %-8d | %-15.15s | %-12.12s | P: %d | %-11s #\n", 
+        curr->id, 
+        curr->nome_cittadino, 
+        curr->categoria, 
+        curr->urgenza, 
+        statoStr
+      );
+      trovati++;
+    }
+
+    curr = (catIdx == -1) ? curr->nextData : curr->nextId;
+  }
+
+  for (int i = trovati; i < 12; i++) {
+    printf(" # |          |                 |              |      |             #\n");
+  }
 }

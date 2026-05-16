@@ -8,6 +8,7 @@ void dashboard(Root);
 void showSeg(Root);
 void salvataggio(Root);
 void removeSeg(Root);
+void init_search_seg(Root);
 
 
 #endif

@@ -13,18 +13,19 @@ int main(void) {
   if (sistema == NULL) return 1;
 
   clock_t start = clock();
-  printf("Caricamento delle segnalazioni in corso... \n");
+  printf(" #   - Caricamento delle segnalazioni in corso... \n");
   init_loadingDb(sistema, "./components/database/database.bin");
   init_sorting(sistema);
   clock_t end = clock();
   double time = ( (double) (end - start) / CLOCKS_PER_SEC);
 
-  printf(" #     Risultato caricamento ");
-  printf(" #     Tempo impiegato %.8f secondi \n", time);
-  printf(" #     Premi INVIO per entrare nel portale...");
+  printf(" #   - Risultato caricamento \n");
+  printf(" #   - Tempo impiegato %.8f secondi per\n", time);
+  printf(" #   - Premi INVIO per entrare nel portale...");
   getchar();
 
   while(1) {
+
     dashboard(sistema);
   
     int choise;
@@ -35,21 +36,27 @@ int main(void) {
       case 1: {
         insertNewSeg(sistema);        
       } break;
+
       case 2: {
         removeSeg(sistema);
       } break;
+
       case 3: {
         showSeg(sistema);
       } break;
+
       case 4: {
-        
+        init_search_seg(sistema);
       } break;
+
       case 5: {
         
       } break;
+
       case 6: {
         
       } break;
+
       case 0: {
         salvataggio(sistema);
       } break;

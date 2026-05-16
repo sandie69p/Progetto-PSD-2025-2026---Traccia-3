@@ -37,5 +37,6 @@ s nextForUrg(s);
 void getNewSeg(Root);
 void save_records(Root);
 void deleteGraph(Root);
+void search_seg(Root, const char *);
 
 #endif

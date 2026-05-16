@@ -59,6 +59,7 @@ void dashboard(Root sistema) {
   printf(" #   - Creare una segnalazione:           1          # \n");
   printf(" #   - Rimuovere una segnalazione:        2          # \n");
   printf(" #   - Mostra segnalazioni per data:      3          # \n");
+  printf(" #   - Mostra segnalazioni per id:        4          # \n");
   printf(" #   - Salvare ed uscire:                 0          # \n");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
 }
@@ -109,7 +110,7 @@ void showSeg(Root root) {
   }
 
   printf(" # |--------------------------------------------------------------------| # \n");
-  printf(" # Mostrate le prime 20 segnalazioni. Premi INVIO... # \n");
+  printf(" # |        - Mostrate le prime 20 segnalazioni. Premi INVIO...         | # \n");
   getchar(); getchar();
 }
 
@@ -118,11 +119,66 @@ void insertNewSeg(Root root) {
 }
 
 void removeSeg(Root root) {
-  printf("# Rimuovi la segnalazione usando l'id: ");
+  printf(" #   - Rimuovi la segnalazione usando l'id: ");
   
   int idTarget;
   scanf("%d", &idTarget);
   getchar();
 
-  init_removeSeg(root, idTarget);
+  if (idTarget > 2199999) {
+    printf(" #   - Segnalazione non valida, ritorno alla dashboard!");
+    return;
+  } else {
+    printf(" #   - Rimozione segnalazione effettuata! \n");
+    init_removeSeg(root, idTarget);
+  }
+}
+
+void init_search_seg(Root root) {
+  char query[8] = "";
+  int index = 0;
+  int ch;
+
+  system("stty -icanon -echo");
+  printf("\033[H\033[J");
+
+  while(1) {
+    printf("\033[H");
+        
+    printf(" ##### ##### ##### PORTALE COMUNALE - RICERCA LIVE ##### ##### ##### \n");
+    printf(" # Digita l'ID (Premi ESC per uscire o BACKSPACE per cancellare)     \n");
+    printf(" # \n");
+    printf(" # BARRA DI RICERCA: [ %-7s ] \033[K\n", query);
+
+    intestation();
+
+    if (index > 0) {
+      search_seg(root, query);
+    } else {
+      for(int i = 0; i < 12; i++) {
+        if (i == 5) printf(" # |              Inizia a digitare le cifre dell'ID...            | # \n");
+        else        printf(" # |                                                               | # \n");
+      }
+    }
+    printf(" # ----------------------------------------------------------------- # \n");
+    fflush(stdout);
+
+    ch = getchar();
+
+    if (ch == 27) {
+      break;
+    } 
+    else if (ch == 127 || ch == 8) {
+      if (index > 0) {
+        query[--index] = '\0';
+      }
+    } 
+    else if (ch >= '0' && ch <= '9' && index < 7) {
+      query[index++] = ch;
+      query[index] = '\0';
+    }
+  }
+
+  system("stty cooked echo");
+  printf("\033[H\033[J");
 }
