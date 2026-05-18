@@ -6,9 +6,10 @@
 #include "../adt/struct.h"
 
 void intestation() {
-  printf(" # |---------------------- ELENCO SEGNALAZIONI -------------------------| # \n");
-  printf(" # |    ID    |      CITTADINO      |    DATA    |     STATO     | U    | # \n");
-  printf(" # |--------------------------------------------------------------------| # \n");
+  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+  printf(" # |----------------------------------------- ELENCO SEGNALAZIONI ---------------------------------------| # \n");
+  printf(" # |        ID        |        CITTADINO       |     DATA     |     STATO     |     CATEORIA     |   U   | # \n");
+  printf(" # |-----------------------------------------------------------------------------------------------------| # \n");
 }
 
 void animazione_salvataggio() {
@@ -48,20 +49,46 @@ void salvataggio(Root sistema) {
 void dashboard(Root sistema) {
   printf("\033[H\033[J");
     
-  //       ##### Interfaccia grafica - Portale consulente  #####
-  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" #   - Numero segnalazioni comune:  %7d          # \n", getTotalSeg(sistema));
-  printf(" #   - Seagnalazioni aperte:        %7d          # \n", getTotalAperte(sistema));
-  printf(" #   - Segnalazioni in risoluzione: %7d          # \n", getTotalRis(sistema));
-  printf(" #   - Segnalazioni chiuse:         %7d          # \n", getTotalChiuse(sistema));
-  printf(" #   - Segnalazioni Urgenti (5)     %7d          # \n", getMostUrgenti(sistema));
-  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" #   - Creare una segnalazione:           1          # \n");
-  printf(" #   - Rimuovere una segnalazione:        2          # \n");
-  printf(" #   - Mostra segnalazioni per data:      3          # \n");
-  printf(" #   - Mostra segnalazioni per id:        4          # \n");
-  printf(" #   - Salvare ed uscire:                 0          # \n");
-  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+  printf(" #   %-47s #   %-49s # \n", "STATISTICHE GENERALI", "CONTEGGIO SEGNALAZIONI PER CATEGORIA");
+  printf(" #---------------------------------------------------#-----------------------------------------------------# \n");
+
+  printf(" #   - Numero segnalazioni comune:  %7d          #  - Illuminazione:  %7d                          # \n", 
+    getTotalSeg(sistema), getSegCountByCategory(sistema, 1));
+
+  printf(" #   - Segnalazioni aperte:         %7d          #  - Rifiuti:        %7d                          # \n", 
+    getTotalAperte(sistema), getSegCountByCategory(sistema, 2));
+
+  printf(" #   - Segnalazioni in risoluzione: %7d          #  - Strade:         %7d                          # \n", 
+    getTotalRis(sistema), getSegCountByCategory(sistema, 3));
+
+  printf(" #   - Segnalazioni chiuse:         %7d          #  - Verde Pubblico: %7d                          # \n", 
+    getTotalChiuse(sistema), getSegCountByCategory(sistema, 4));
+
+  printf(" #   - Segnalazioni Urgenti (5):    %7d          #  - Incendio:       %7d                          # \n", 
+    getMostUrgenti(sistema), getSegCountByCategory(sistema, 0));
+
+  printf(" #---------------------------------------------------#  - Allagamento:    %7d                          # \n", 
+    getSegCountByCategory(sistema, 5));
+
+  printf(" #   - Creare una segnalazione:           1          #  - Segnaletica:    %7d                          # \n", 
+    getSegCountByCategory(sistema, 6));
+
+  printf(" #   - Rimuovere una segnalazione:        2          #  - Edilizia:       %7d                          # \n", 
+    getSegCountByCategory(sistema, 7));
+
+  printf(" #   - Mostra segnalazioni per data:      3          #  - Randagismo:     %7d                          # \n", 
+    getSegCountByCategory(sistema, 8));
+
+  printf(" #   - Mostra segnalazioni per id:        4          #  - Inquinamento:   %7d                          # \n", 
+    getSegCountByCategory(sistema, 9));
+
+  printf(" #   - Salvare ed uscire:                 0          #  - Sicurezza:      %7d                          # \n", 
+    getSegCountByCategory(sistema, 10));
+
+  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+  printf(" #   Scelta: ");
+  fflush(stdout);
 }
 
 void getSeg(s node) {
@@ -71,7 +98,8 @@ void getSeg(s node) {
   const char *statoStr;
 
   switch(getState(node)) {
-    case 0: { statoStr = "Aperta"; 
+    case 0: { 
+      statoStr = "Aperta"; 
     } break;
 
     case 1: { 
@@ -81,17 +109,23 @@ void getSeg(s node) {
     case 2: {
       statoStr = "Chiusa"; 
     } break;
+    default: {
+      statoStr = "N/D";
+    } break;
   }
 
-  printf(" # | %-8d | %-15.15s     | %-10s | %-11s   | P: %d | # \n",
+  printf(" # | %-16d | %-22.22s | %-12s | %-13s | %-16.16s |   %d   | # \n",
     getID(node),
     getName(node),
-    dataStr,
+    dataStr ? dataStr : "N/D",
     statoStr,
+    getCat(node),
     getUrg(node)
   );
 
-  free(dataStr);
+  if (dataStr) {
+    free(dataStr);
+  }
 }
 
 void showSeg(Root root) {
@@ -100,17 +134,18 @@ void showSeg(Root root) {
   intestation();
 
   s currentSeg = getDataHead(root);
-
   int limit = 0;
 
-  while(currentSeg != NULL && limit < 20/* per dimostrazione*/ ) {
-    getSeg(currentSeg);
+  while(currentSeg != NULL && limit < 20) {
+    getSeg(currentSeg); 
     currentSeg = nextForData(currentSeg);
     limit++;
   }
 
-  printf(" # |--------------------------------------------------------------------| # \n");
-  printf(" # |        - Mostrate le prime 20 segnalazioni. Premi INVIO...         | # \n");
+  printf(" # |-----------------------------------------------------------------------------------------------------| # \n");
+  printf(" # |-------------- Mostrate le prime 20 segnalazioni in ordine cronologico. Premi INVIO: ----------------| # \n");
+  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+  
   getchar(); getchar();
 }
 

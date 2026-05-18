@@ -3,22 +3,28 @@ CFLAGS = -Wall -Wextra -g -I./components/HUD -I./components/adt
 
 TARGET = municipal_system
 
-OBJS = main.o components/HUD/hud.o components/adt/struct.o
+OBJ_DIR = components/object
+
+OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/hud.o $(OBJ_DIR)/struct.o
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c main.c -o main.o
+$(OBJ_DIR)/main.o: main.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c main.c -o $(OBJ_DIR)/main.o
 
-components/HUD/hud.o: components/HUD/hud.c components/HUD/hud.h
-	$(CC) $(CFLAGS) -c components/HUD/hud.c -o components/HUD/hud.o
+$(OBJ_DIR)/hud.o: components/HUD/hud.c components/HUD/hud.h components/adt/struct.h
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c components/HUD/hud.c -o $(OBJ_DIR)/hud.o
 
-components/adt/struct.o: components/adt/struct.c components/adt/struct.h
-	$(CC) $(CFLAGS) -c components/adt/struct.c -o components/adt/struct.o
+$(OBJ_DIR)/struct.o: components/adt/struct.c components/adt/struct.h
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c components/adt/struct.c -o $(OBJ_DIR)/struct.o
 
 clean:
 	rm -f $(TARGET) $(OBJS)
+	rm -rf $(OBJ_DIR)
 
 run: $(TARGET)
 	./$(TARGET)

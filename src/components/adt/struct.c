@@ -2,14 +2,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "./struct.h"
 
 struct segnalazione {
-  int id;                     // SSNNNN
+  int32_t id;
   char nome_cittadino[64];
   char categoria[64];
   char descrizione[1024];
-  int data;                   // YYYYMMDD
+  int data;
   int urgenza;
   int stato;
   s nextId;
@@ -77,7 +78,7 @@ struct root {
 };
 
 Root init_root() {
-  Root r = (Root) calloc(1, sizeof(struct root));
+  Root r = calloc(1, sizeof(struct root));
   if(r == NULL) return NULL;
   
   // Inizializzo i nodi di controllo
@@ -91,77 +92,38 @@ Root init_root() {
   r->stato->risoluzione = (risNode *) calloc(1, sizeof(risNode));
   r->stato->chiuso = (chiusoNode *) calloc(1, sizeof(chiusoNode));
 
-  for (int i = 0; i < allCat; i++) { r->id->cat[i] = NULL; r->id->nCat[i] = 0; }
-  r->data->head = NULL;
-  for (int i = 0; i < 5; i ++) { r->urgenza->priority[i] = NULL; r->urgenza->nPrio[i] = 0; }
-  r->stato->aperto->head = NULL;
-  r->stato->risoluzione->head = NULL;
-  r->stato->chiuso->head = NULL;
-  
-  r->totSegnalazioni = 0;
-
   return r;
 }
 
-void insertOnGraph(Root r, s newSeg) {
-  if (r == NULL || newSeg == NULL) return;
+int getCategoryIndex(int prefisso) {
+  switch (prefisso) {
+    case 10: return illuminazione;
+    case 20: return rifiuti;
+    case 30: return strade;
+    case 40: return verde;
+    case 50: return incendio;
+    case 60: return allagamento;
+    case 70: return segnaletica;
+    case 80: return edilizia;
+    case 90: return randagismo;
+    case 11: return inquinamento;
+    case 21: return sicurezza;
+    default: return -1;
+  }
+} 
+
+bool insertOnGraph(Root r, s newSeg) {
+  if (r == NULL || newSeg == NULL) return false;
 
   int prefisso = newSeg->id / 100000;
-  int catIdx;
+  int catIdx = -1;
 
-  switch (prefisso) {
-    case 10: { 
-      catIdx = illuminazione; 
-    } break;
-
-    case 20: { 
-      catIdx = rifiuti; 
-    } break;
-
-    case 30: { 
-      catIdx = strade; 
-    } break;
-
-    case 40: { 
-      catIdx = verde; 
-    } break;
-
-    case 50: { 
-      catIdx = incendio; 
-    } break;
-
-    case 60: {
-      catIdx = allagamento; 
-    } break;
-
-    case 70: { 
-      catIdx = segnaletica; 
-    } break;
-
-    case 80: { 
-      catIdx = edilizia; 
-    } break;
-
-    case 90: { 
-      catIdx = randagismo; 
-    } break;
-
-    case 11: { 
-      catIdx = inquinamento; 
-    } break;
-
-    case 21: {
-      catIdx = sicurezza; 
-    } break;
-
-    default: { 
-      catIdx = -1; 
-    } break;
-  }
+  catIdx = getCategoryIndex(prefisso);
 
   if (catIdx != -1) {
     newSeg->nextId = r->id->cat[catIdx];
     r->id->cat[catIdx] = newSeg;
+    r->id->nCat[catIdx]++;
 
     newSeg->nextData = r->data->head;
     r->data->head = newSeg;
@@ -187,7 +149,9 @@ void insertOnGraph(Root r, s newSeg) {
     }
     
     r->totSegnalazioni++;
+    return true;
   }
+  return false;
 }
 
 void init_loadingDb(Root r, const char *fileName) {
@@ -233,12 +197,7 @@ void init_loadingDb(Root r, const char *fileName) {
       break; 
     }
 
-    nuova->nextId = NULL;
-    nuova->nextData = NULL;
-    nuova->nextStato = NULL;
-    nuova->nextUrg = NULL;
-
-    insertOnGraph(r, nuova);
+    if (!insertOnGraph(r, nuova)) free(nuova);
   }
 
   fclose(f);
@@ -298,144 +257,59 @@ void init_sorting(Root r) {
   if (dataSeg == NULL) return;
 
   s curr = r->data->head;
-  
   for (int i = 0; i < n && curr != NULL; i++) {
     dataSeg[i] = curr;
     curr = curr->nextData;
-
   }
 
   quicksort(dataSeg, 0, n - 1, 1);
-
   r->data->head = dataSeg[0];
-
   for (int i = 0; i < n - 1; i++) {
     dataSeg[i]->nextData = dataSeg[i+1];
-
   }
-  
   dataSeg[n-1]->nextData = NULL;
 
-  // Inizio ordinamento id per categoria
   quicksort(dataSeg, 0, n - 1, 2);
-
-  for(int i = 0; i < allCat; i++) {
-    r->id->cat[i] = NULL;
-  }
-
-  // Inserimento a ritroso perche' e' l'inserimento in LIFO;
+  for(int i = 0; i < allCat; i++) r->id->cat[i] = NULL;
+  
   for(int i = n - 1; i >= 0; i--) {
     s nodo = dataSeg[i];
-
-    int prefix = (int) nodo->id / 100000;
-    int catIdx = -1;
-
-    switch (prefix) {
-      case 10: { 
-        catIdx = illuminazione; 
-      } break;
-
-      case 20: { 
-        catIdx = rifiuti; 
-      } break;
-
-      case 30: { 
-        catIdx = strade; 
-      } break;
-
-      case 40: { 
-        catIdx = verde; 
-      } break;
-
-      case 50: { 
-        catIdx = incendio; 
-      } break;
-
-      case 60: {
-        catIdx = allagamento; 
-      } break;
-
-      case 70: { 
-        catIdx = segnaletica; 
-      } break;
-
-      case 80: { 
-        catIdx = edilizia; 
-      } break;
-
-      case 90: { 
-        catIdx = randagismo; 
-      } break;
-
-      case 11: { 
-        catIdx = inquinamento; 
-      } break;
-
-      case 21: {
-        catIdx = sicurezza; 
-      } break;
-    }
-
+    int catIdx = getCategoryIndex(nodo->id / 100000);
     if(catIdx != -1) {
       nodo->nextId = r->id->cat[catIdx];
       r->id->cat[catIdx] = nodo;
-
     }
   }
 
-  // Inizio ordinamento urgenza
-  quicksort(dataSeg, 0, n - 1, 3);
-  
-  for (int i = 0; i < 5; i++) {
-    r->urgenza->priority[i] = NULL;
-    r->urgenza->nPrio[i] = 0;
+  quicksort(dataSeg, 0, n - 1, 4);
+  r->stato->aperto->head = NULL;
+  r->stato->risoluzione->head = NULL;
+  r->stato->chiuso->head = NULL;
 
+  for(int i = n - 1; i >= 0; i--) {
+    s nodo = dataSeg[i];
+    if (nodo->stato == 0) {
+      nodo->nextStato = r->stato->aperto->head;
+      r->stato->aperto->head = nodo;
+    } else if (nodo->stato == 1) {
+      nodo->nextStato = r->stato->risoluzione->head;
+      r->stato->risoluzione->head = nodo;
+    } else if (nodo->stato == 2) {
+      nodo->nextStato = r->stato->chiuso->head;
+      r->stato->chiuso->head = nodo;
+    }
   }
 
-  for (int i = n - 1; i >= 0; i--) {
+  quicksort(dataSeg, 0, n - 1, 3);
+  for(int i = 0; i < 5; i++) r->urgenza->priority[i] = NULL;
+
+  for(int i = n - 1; i >= 0; i--) {
     s nodo = dataSeg[i];
     int urgIdx = nodo->urgenza - 1;
-
     if (urgIdx >= 0 && urgIdx < 5) {
       nodo->nextUrg = r->urgenza->priority[urgIdx];
       r->urgenza->priority[urgIdx] = nodo;
       r->urgenza->nPrio[urgIdx]++;
-
-    }
-  }
-
-  // Inizio ordinamento stati
-  quicksort(dataSeg, 0, n - 1, 4);
-
-  r->stato->aperto->head = NULL;
-  r->stato->chiuso->head = NULL;
-  r->stato->risoluzione->head = NULL;
-
-  r->stato->aperto->totAperte = 0;
-  r->stato->risoluzione->totRis = 0;
-  r->stato->chiuso->totChiuse = 0;
-
-  for (int i = n - 1; i >= 0; i--) {
-    s nodo = dataSeg[i];
-
-    switch (nodo->stato) {
-      case 0: {
-        nodo->nextStato = r->stato->aperto->head;
-        r->stato->aperto->head = nodo;
-        r->stato->aperto->totAperte++;
-      } break;
-      
-      case 1: {
-        nodo->nextStato = r->stato->risoluzione->head;
-        r->stato->risoluzione->head = nodo;
-        r->stato->risoluzione->totRis++;
-      } break;
-
-      case 2: {
-        nodo->nextStato = r->stato->chiuso->head;
-        r->stato->chiuso->head = nodo;
-        r->stato->chiuso->totChiuse++;
-      } break;
     }
   }
 
@@ -467,7 +341,7 @@ s getDataHead(Root root) {
   return (root != NULL) ? root->data->head : NULL;
 }
 
-int getID(s node) {
+int32_t getID(s node) {
   return (node != NULL) ? node->id : 0;
 }
 
@@ -550,7 +424,7 @@ void deleteGraph(Root root) {
   free(root);
 }
 
-int getRandomId(Root root, int prefix, int catIdx) {
+int32_t getRandomId(Root root, int prefix, int catIdx) {
   int maxNum = 100000;
   int id;
 
@@ -558,7 +432,7 @@ int getRandomId(Root root, int prefix, int catIdx) {
   
   do {
     duplicato = 0;
-    id = (prefix * 100000) + (rand() % maxNum);
+    id = (prefix * maxNum) + (rand() % maxNum);
 
     s currSeg = root->id->cat[catIdx];
 
@@ -573,6 +447,12 @@ int getRandomId(Root root, int prefix, int catIdx) {
   } while (duplicato);
 
   return id;
+}
+
+int getSegCountByCategory(Root root, int catIdx) {
+  if (root == NULL || root->id == NULL) return 0;
+  if (catIdx < 0 || catIdx >= allCat) return 0;
+  return root->id->nCat[catIdx];
 }
 
 void appendNewSeg(s newSeg, const char *fileName) {
@@ -632,6 +512,8 @@ void getPosition(Root root, s newSeg, int catIdx) {
     currSeg->nextId = newSeg;
   }
 
+  root->id->nCat[catIdx]++;
+
   if (newSeg->stato == 0) { // Aperto
       newSeg->nextStato = root->stato->aperto->head;
       root->stato->aperto->head = newSeg;
@@ -667,9 +549,19 @@ void getNewSeg(Root root) {
   s newSeg = (s) calloc(1, sizeof(struct segnalazione));
   if (newSeg == NULL) return;
 
-  printf("Seleziona una Categoria: \n");
-  printf(" # 1) Illuminazione\n # 2) Rifiuti\n # 3) Strade\n # 4) Verde\n # 5) Incendio\n # 6) Allagamento\n # 7) Segnaletica\n # 8) Edilizia\n # 9) Randagismo\n # 10) Inquinamento\n # 11) Sicurezza\n");
-  printf(" # Scelta: ");
+  printf(" #   - Seleziona una Categoria: \n");
+  printf(" #   - 1) Illuminazione \n");
+  printf(" #   - 2) Rifiuti \n");
+  printf(" #   - 3) Strade \n");
+  printf(" #   - 4) Verde \n");
+  printf(" #   - 5) Incendio");
+  printf(" #   - 6) Allagamento \n");
+  printf(" #   - 7) Segnaletica \n");
+  printf(" #   - 8) Edilizia \n");
+  printf(" #   - 9) Randagismo \n");
+  printf(" #   - 10) Inquinamento \n");
+  printf(" #   - 11) Sicurezza \n");
+  printf(" #   - Scelta: ");
   scanf("%d", &scelta);
   getchar();
 
@@ -728,15 +620,15 @@ void getNewSeg(Root root) {
 
   newSeg->id = getRandomId(root, prefix, catIdx);
 
-  printf("Nome del cittadino: ");
+  printf(" #   - Nome del cittadino: ");
   fgets(newSeg->nome_cittadino, 64, stdin);
   newSeg->nome_cittadino[strcspn(newSeg->nome_cittadino, "\n")] = 0;
 
-  printf("Inserisci descrizione: ");
+  printf(" #   - Inserisci descrizione: ");
   fgets(newSeg->descrizione, 1024, stdin);
   newSeg->descrizione[strcspn(newSeg->descrizione, "\n")] = 0;
 
-  printf("Inserisci data (DD/MM/AAAA) : "); // aggiungere placeholder
+  printf(" #   - Inserisci data (DD/MM/AAAA) : "); // aggiungere placeholder
   scanf("%d/%d/%d", &giorno, &mese, &anno);
   getchar();
   newSeg->data = anno * 10000 + mese * 100 + giorno;
@@ -745,61 +637,19 @@ void getNewSeg(Root root) {
   newSeg->urgenza = 3;
   newSeg->stato = 0;
 
+  printf(" #   - Nuova segnalazione creata con ID: %d", newSeg->id);
+  printf(" #   - Premi INVIO per tornare alla Dashboard: ");
+  getchar();
+
   getPosition(root, newSeg, catIdx);
   appendNewSeg(newSeg, "./components/database/database.bin");
 }
 
-void init_removeSeg(Root r, int idTarget) {
+void init_removeSeg(Root r, int32_t idTarget) {
   if (!r) return;
 
   int prefisso = idTarget / 100000;
-  int catIdx = -1;
-
-  switch (prefisso) {
-    case 10: { 
-      catIdx = illuminazione; 
-    } break;
-
-    case 20: { 
-      catIdx = rifiuti; 
-    } break;
-
-    case 30: { 
-      catIdx = strade; 
-    } break;
-
-    case 40: { 
-      catIdx = verde; 
-    } break;
-
-    case 50: { 
-      catIdx = incendio; 
-    } break;
-
-    case 60: {
-      catIdx = allagamento; 
-    } break;
-
-    case 70: { 
-      catIdx = segnaletica; 
-    } break;
-
-    case 80: { 
-      catIdx = edilizia; 
-    } break;
-
-    case 90: { 
-      catIdx = randagismo; 
-    } break;
-
-    case 11: { 
-      catIdx = inquinamento; 
-    } break;
-
-    case 21: {
-      catIdx = sicurezza; 
-    } break;
-  }
+  int catIdx = getCategoryIndex(prefisso);
 
   s curr = r->id->cat[catIdx];
   s prev = NULL;
@@ -838,23 +688,40 @@ void init_removeSeg(Root r, int idTarget) {
   }
 
   if (currU) {
-    if (!prevU) 
-      r->urgenza->priority[p] = currU->nextUrg;
-    else 
-      prevU->nextUrg = currU->nextUrg;
-      
+    if (!prevU) r->urgenza->priority[p] = currU->nextUrg;
+    else prevU->nextUrg = currU->nextUrg;
     r->urgenza->nPrio[p]--;
   }
 
-  r->id->nCat[catIdx]--;
+  s currS = NULL;
+  s prevS = NULL;
+
+  if (curr->stato == 0) currS = r->stato->aperto->head;
+  else if (curr->stato == 1) currS = r->stato->risoluzione->head;
+  else if (curr->stato == 2) currS = r->stato->chiuso->head;
+
+  while (currS && currS->id != idTarget) {
+    prevS = currS;
+    currS = currS->nextStato;
+  }
+
+  if (currS) {
+    if (!prevS) {
+      if (curr->stato == 0) r->stato->aperto->head = currS->nextStato;
+      else if (curr->stato == 1) r->stato->risoluzione->head = currS->nextStato;
+      else if (curr->stato == 2) r->stato->chiuso->head = currS->nextStato;
+    } else {
+      prevS->nextStato = currS->nextStato;
+    }
+  }
+
+  r->id->nCat[catIdx]--; 
   r->totSegnalazioni--;
   
   if (curr->stato == 0) 
     r->stato->aperto->totAperte--;
-
   else if (curr->stato == 1) 
     r->stato->risoluzione->totRis--;
-
   else if (curr->stato == 2) 
     r->stato->chiuso->totChiuse--;
 
@@ -894,51 +761,7 @@ void search_seg(Root r, const char *searchString) {
     };
     int prefisso = atoi(prefixStr);
 
-    switch (prefisso) {
-      case 10: { 
-        catIdx = illuminazione; 
-      } break;
-
-      case 20: { 
-        catIdx = rifiuti; 
-      } break;
-
-      case 30: { 
-        catIdx = strade; 
-      } break;
-
-      case 40: { 
-        catIdx = verde; 
-      } break;
-
-      case 50: { 
-        catIdx = incendio; 
-      } break;
-
-      case 60: {
-        catIdx = allagamento; 
-      } break;
-
-      case 70: { 
-        catIdx = segnaletica; 
-      } break;
-
-      case 80: { 
-        catIdx = edilizia; 
-      } break;
-
-      case 90: { 
-        catIdx = randagismo; 
-      } break;
-
-      case 11: { 
-        catIdx = inquinamento; 
-      } break;
-
-      case 21: {
-        catIdx = sicurezza; 
-      } break;
-    }
+    catIdx = getCategoryIndex(prefisso);
   }
 
   int trovati = 0;
