@@ -18,7 +18,7 @@
  * contenente i contatori globali, i dati per categoria e il menu delle scelte.
  * @param sistema La radice del sistema da cui campionare le statistiche in tempo reale.
  */
-void dashboard(Root sistema);
+void dashboard(Root);
 
 /**
  * @brief Avvia la procedura guidata per l'acquisizione di una nuova segnalazione.
@@ -27,7 +27,7 @@ void dashboard(Root sistema);
  * alloca il nodo, aggiorna gli indici in RAM e scrive il record in append su disco.
  * @param root Il sistema in cui inserire la nuova segnalazione.
  */
-void insertNewSeg(Root root);
+void insertNewSeg(Root);
 
 /**
  * @brief Interfaccia interattiva per la rimozione controllata di una segnalazione.
@@ -36,7 +36,7 @@ void insertNewSeg(Root root);
  * per estirpare il nodo dai 4 indici ortogonali in memoria e decrementare i contatori.
  * @param root Il sistema da cui eliminare il record.
  */
-void removeSeg(Root root);
+void removeSeg(Root);
 
 /**
  * @brief Visualizza una tabella ordinata contenente le prime 20 segnalazioni.
@@ -46,7 +46,7 @@ void removeSeg(Root root);
  * @note Blocca l'esecuzione con una richiesta di INVIO (getchar) per consentire la lettura.
  * @param root Il sistema da cui campionare la testa cronologica.
  */
-void showSeg(Root root);
+void showSeg(Root);
 
 /**
  * @brief Attiva il motore di ricerca live e incrementale a terminale.
@@ -57,7 +57,12 @@ void showSeg(Root root);
  * @note Sfrutta sequenze di escape ANSI per il posizionamento del cursore senza sfarfallio.
  * @param root Il sistema su cui effettuare il filtraggio dinamico dei nodi.
  */
-void init_search_seg(Root root);
+void init_search_seg(Root);
+
+/**
+ * @note da inserire
+*/
+void modifySegHud(Root);
 
 /**
  * @brief Consolda i dati su disco, dealloca il grafo e spegne l'applicazione.
@@ -67,6 +72,6 @@ void init_search_seg(Root root);
  * @note Questa funzione non ritorna mai al chiamante, ma effettua una exit(0) deterministica.
  * @param sistema Il sistema finale da salvare e distruggere.
  */
-void salvataggio(Root sistema);
+void salvataggio(Root);
 
 #endif

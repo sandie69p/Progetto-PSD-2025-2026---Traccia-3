@@ -1,9 +1,21 @@
+/**
+ *  #############################
+ *  # INCLUSIONE DELLE LIBRERIE #
+ *  #############################
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "./struct.h"
+
+/**
+ * #######################
+ * # INIZIO INTERO GRAFO #
+ * #######################
+*/
 
 struct segnalazione {
   int32_t id;
@@ -77,6 +89,14 @@ struct root {
   int totSegnalazioni;
 };
 
+/**
+ *  #####################
+ *  # FINE INTERO GRAFO #
+ *  #####################
+*/
+
+
+// Inizializza struttura
 Root init_root() {
   Root r = calloc(1, sizeof(struct root));
   if(r == NULL) return NULL;
@@ -92,9 +112,15 @@ Root init_root() {
   r->stato->risoluzione = (risNode *) calloc(1, sizeof(risNode));
   r->stato->chiuso = (chiusoNode *) calloc(1, sizeof(chiusoNode));
 
+  /**
+   * CONTROLLI SULLE STRUTTURE RIMOSSI
+   * @note siccome calloc inizializza tutti i bit a 0 e' ridondante assegnare NULL
+  */
+
   return r;
 }
 
+// Ottieni categoria tramite prefisso
 int getCategoryIndex(int prefisso) {
   switch (prefisso) {
     case 10: return illuminazione;
@@ -112,6 +138,7 @@ int getCategoryIndex(int prefisso) {
   }
 } 
 
+// Inserisci segnalazione nel grafo
 bool insertOnGraph(Root r, s newSeg) {
   if (r == NULL || newSeg == NULL) return false;
 
@@ -154,6 +181,7 @@ bool insertOnGraph(Root r, s newSeg) {
   return false;
 }
 
+// Loading del database.bin
 void init_loadingDb(Root r, const char *fileName) {
   FILE *f = fopen(fileName, "rb");
   if (f == NULL) { perror("Errore apertura file"); return; }
@@ -203,6 +231,7 @@ void init_loadingDb(Root r, const char *fileName) {
   fclose(f);
 }
 
+// Logica di ordinamento
 void quicksort(s *arr, int low, int high, int type) {
   if (low < high) {
     s pivot = arr[high];
@@ -247,6 +276,7 @@ void quicksort(s *arr, int low, int high, int type) {
   }
 }
 
+// Inizia ordinamento
 void init_sorting(Root r) {
   if (r == NULL) return;
 
@@ -316,7 +346,13 @@ void init_sorting(Root r) {
   free(dataSeg);
 }
 
-// Section Dashboard getter
+
+/**
+ * ###################
+ * # GETTER FUNCTION #
+ * ###################
+ */
+
 int getTotalSeg(Root root) {
   return (root != NULL) ? root->totSegnalazioni : 0;
 }
@@ -395,6 +431,7 @@ s nextForUrg(s node) {
   return (node != NULL) ? node->nextUrg : NULL;
 }
 
+// Elimina grafo
 void deleteGraph(Root root) {
   if (root == NULL || root->data == NULL) return;
 
@@ -424,6 +461,7 @@ void deleteGraph(Root root) {
   free(root);
 }
 
+// Crea un id random
 int32_t getRandomId(Root root, int prefix, int catIdx) {
   int maxNum = 100000;
   int id;
@@ -449,12 +487,14 @@ int32_t getRandomId(Root root, int prefix, int catIdx) {
   return id;
 }
 
+// Prendi la quantita' di segnalazioni rispetto alla categoria
 int getSegCountByCategory(Root root, int catIdx) {
   if (root == NULL || root->id == NULL) return 0;
   if (catIdx < 0 || catIdx >= allCat) return 0;
   return root->id->nCat[catIdx];
 }
 
+// Inserisce nuova segnalazione nel file binario
 void appendNewSeg(s newSeg, const char *fileName) {
   if (newSeg == NULL) return;
 
@@ -474,6 +514,7 @@ void appendNewSeg(s newSeg, const char *fileName) {
   printf("[FILE] Segnalazione registrata con successo!");
 }
 
+// Acquisisci posizione
 void getPosition(Root root, s newSeg, int catIdx) {
   if (root == NULL || newSeg == NULL) return;
   if (catIdx < 0 || catIdx >= allCat) return;
@@ -543,6 +584,7 @@ void getPosition(Root root, s newSeg, int catIdx) {
   root->totSegnalazioni++;
 }
 
+// Prendi nuova segnalazione
 void getNewSeg(Root root) {
   int giorno, mese, anno, scelta;
 
@@ -566,59 +608,59 @@ void getNewSeg(Root root) {
   getchar();
 
   int catIdx = scelta - 1;
-  int prefix = 0;
+  int prefisso = 0;
 
   switch (catIdx) {
     case illuminazione: {
-      prefix = 10; strcpy(newSeg->categoria, "Illuminazione"); 
+      prefisso = 10; strcpy(newSeg->categoria, "Illuminazione"); 
     } break;
 
     case rifiuti: { 
-      prefix = 20; strcpy(newSeg->categoria, "Rifiuti"); 
+      prefisso = 20; strcpy(newSeg->categoria, "Rifiuti"); 
     } break;
 
     case strade: { 
-      prefix = 30; strcpy(newSeg->categoria, "Strade"); 
+      prefisso = 30; strcpy(newSeg->categoria, "Strade"); 
     } break;
 
     case verde: { 
-      prefix = 40; strcpy(newSeg->categoria, "Verde"); 
+      prefisso = 40; strcpy(newSeg->categoria, "Verde"); 
     } break;
 
     case incendio: { 
-      prefix = 50; strcpy(newSeg->categoria, "Incendio"); 
+      prefisso = 50; strcpy(newSeg->categoria, "Incendio"); 
     } break;
 
     case allagamento: { 
-      prefix = 60; strcpy(newSeg->categoria, "Allagamento"); 
+      prefisso = 60; strcpy(newSeg->categoria, "Allagamento"); 
     } break;
 
     case segnaletica: { 
-      prefix = 70; strcpy(newSeg->categoria, "Segnaletica"); 
+      prefisso = 70; strcpy(newSeg->categoria, "Segnaletica"); 
     } break;
 
     case edilizia: { 
-      prefix = 80; strcpy(newSeg->categoria, "Edilizia"); 
+      prefisso = 80; strcpy(newSeg->categoria, "Edilizia"); 
     } break;
 
     case randagismo: { 
-      prefix = 90; strcpy(newSeg->categoria, "Randagismo"); 
+      prefisso = 90; strcpy(newSeg->categoria, "Randagismo"); 
     } break;
 
     case inquinamento: { 
-      prefix = 11; strcpy(newSeg->categoria, "Inquinamento"); 
+      prefisso = 11; strcpy(newSeg->categoria, "Inquinamento"); 
     } break;
 
     case sicurezza: { 
-      prefix = 21; strcpy(newSeg->categoria, "Sicurezza"); 
+      prefisso = 21; strcpy(newSeg->categoria, "Sicurezza"); 
     } break;
 
     default: { 
-      prefix = 0; 
+      prefisso = 0; 
     } break;
   }
 
-  newSeg->id = getRandomId(root, prefix, catIdx);
+  newSeg->id = getRandomId(root, prefisso, catIdx);
 
   printf(" #   - Nome del cittadino: ");
   fgets(newSeg->nome_cittadino, 64, stdin);
@@ -645,6 +687,7 @@ void getNewSeg(Root root) {
   appendNewSeg(newSeg, "./components/database/database.bin");
 }
 
+// Rimuovi segnalazione
 void init_removeSeg(Root r, int32_t idTarget) {
   if (!r) return;
 
@@ -729,24 +772,31 @@ void init_removeSeg(Root r, int32_t idTarget) {
   printf(" #   - Segnalazione %d rimossa con successo.\n", idTarget);
 }
 
+// Salva le segnalazioni nel file binario
 void save_records(Root r) {
     FILE *f = fopen("./components/database/database.bin", "wb");
-    if (!f) return;
+    if (!f) {
+        perror("Errore nell'apertura del database in scrittura");
+        return;
+    }
 
     s curr = r->data->head;
     while (curr) {
-      fwrite(&(curr->id), sizeof(int), 1, f);
-      fwrite(curr->nome_cittadino, 64, 1, f);
-      fwrite(curr->categoria, 64, 1, f);
-      fwrite(curr->descrizione, 1024, 1, f);
+      // Scrittura speculare e precisa nei tipi rispetto alle fread
+      fwrite(&(curr->id), sizeof(int32_t), 1, f);
+      fwrite(curr->nome_cittadino, sizeof(char), 64, f);
+      fwrite(curr->categoria, sizeof(char), 64, f);
+      fwrite(curr->descrizione, sizeof(char), 1024, f);
       fwrite(&(curr->data), sizeof(int), 1, f);
       fwrite(&(curr->urgenza), sizeof(int), 1, f);
       fwrite(&(curr->stato), sizeof(int), 1, f);
+      
       curr = curr->nextData;
     }
     fclose(f);
 }
 
+// Ricerca della segnalazione
 void search_seg(Root r, const char *searchString) {
   if (!r || !searchString) return;
 
@@ -789,5 +839,94 @@ void search_seg(Root r, const char *searchString) {
 
   for (int i = trovati; i < 12; i++) {
     printf(" # |          |                 |              |      |             #\n");
+  }
+}
+
+int getMaxCat(Root root) {
+  if (root == NULL || root->id == NULL) return -1;
+
+  int maxIdx = 0;
+
+  for (int i = 1; i < allCat; i++) {
+    if (root->id->nCat[i] > root->id->nCat[maxIdx]) {
+      maxIdx = i;
+    }
+  }
+
+  return maxIdx;
+}
+
+const char *getMaxCatName(int catIdx) {
+  switch (catIdx) {
+    case illuminazione: return "Illuminazione";
+    case rifiuti: return "Rifiuti";
+    case strade: return "Strade";
+    case verde: return "Verde";
+    case incendio: return "Incendio";
+    case allagamento: return "Allagamento";
+    case segnaletica: return "Segnaletica";
+    case edilizia: return "Edilizia";
+    case randagismo: return "Randagismo";
+    case inquinamento: return "Inquinamento";
+    case sicurezza: return "Sicurezza";
+    default: return "N/D";
+  }
+}
+
+void modifySeg(Root root, int32_t currId, int newState) {
+  if (root == NULL || newState < 0 || newState > 2) return;
+
+  int prefisso = currId / 100000;
+  int catIdx = getCategoryIndex(prefisso);
+
+  s curr = root->id->cat[catIdx];
+  while (curr != NULL && curr->id != currId) {
+    curr = curr->nextId;
+  }
+
+  if (curr == NULL || curr->stato == newState) return;
+
+  int vecchioStato = curr->stato;
+
+  s prevStato = NULL;
+  s currStato = NULL;
+
+  if (vecchioStato == 0) currStato = root->stato->aperto->head;
+  else if (vecchioStato == 1) currStato = root->stato->risoluzione->head;
+  else currStato = root->stato->chiuso->head;
+
+  while (currStato != NULL && currStato != curr) {
+    prevStato = currStato;
+    currStato = currStato->nextStato;
+  }
+
+  if (currStato == curr) {
+    if (prevStato == NULL) {
+      if (vecchioStato == 0) root->stato->aperto->head = curr->nextStato;
+      else if (vecchioStato == 1) root->stato->risoluzione->head = curr->nextStato;
+      else root->stato->chiuso->head = curr->nextStato;
+    } else {
+      prevStato->nextStato = curr->nextStato;
+    }
+
+    if (vecchioStato == 0) root->stato->aperto->totAperte--;
+    else if (vecchioStato == 1) root->stato->risoluzione->totRis--;
+    else root->stato->chiuso->totChiuse--;
+  }
+
+  curr->stato = newState;
+
+  if (newState == 0) {
+    curr->nextStato = root->stato->aperto->head;
+    root->stato->aperto->head = curr;
+    root->stato->aperto->totAperte++;
+  } else if (newState == 1) {
+    curr->nextStato = root->stato->risoluzione->head;
+    root->stato->risoluzione->head = curr;
+    root->stato->risoluzione->totRis++;
+  } else if (newState == 2) {
+    curr->nextStato = root->stato->chiuso->head;
+    root->stato->chiuso->head = curr;
+    root->stato->chiuso->totChiuse++;
   }
 }

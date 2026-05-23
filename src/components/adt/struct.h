@@ -18,6 +18,7 @@ struct segnalazione;
  * @brief Puntatore alla struttura di controllo principale (radice del sistema).
  */
 typedef struct root *Root;
+
 /** * @typedef s
  * @brief Puntatore alla struttura dati del singolo nodo segnalazione.
  */
@@ -135,6 +136,24 @@ const char *getDesc(s);
 const char *getCat(s);
 
 /**
+ * @brief Identifica la categoria del comune che registra l'affluenza massima di problemi.
+ * @pre root deve essere un puntatore Root valido, non vuoto e inizializzato.
+ * @post Scansiona l'indice di categoria calcolando il picco massimo di segnalazioni.
+ * @param root Il sistema di controllo principale.
+ * @return L'indice numerico (catId) della categoria più colpita, -1 se il sistema è vuoto o invalido.
+ */
+int getMaxCat(Root);
+
+/**
+ * @brief Converte l'indice enumerato di una categoria nella sua rispettiva stringa letterale.
+ * @pre idx deve essere un valore coerente con l'intervallo dell'enum catId (da 0 a allCat-1).
+ * @post Associa l'indice alla stringa testuale statica corrispondente.
+ * @param idx L'indice numerico della categoria da convertire.
+ * @return Stringa costante (const char*) contenente il nome della categoria (es. "Illuminazione").
+ */
+const char *getMaxCatName(int);
+
+/**
  * @brief Restituisce la data nel formato raw intero (AAAAMMGG).
  */
 int getRawData(s);
@@ -159,9 +178,11 @@ int getState(s);
 char *getData(s);
 
 
-/* =========================================================================
-   FUNZIONI DI NAVIGAZIONE DEGLI INDICI (ITERATORI)
-   ========================================================================= */
+/**
+ * =========================================================================
+ * FUNZIONI DI NAVIGAZIONE DEGLI INDICI (ITERATORI)
+ * ========================================================================= 
+*/
 
 /**
  * @brief Restituisce il nodo successivo ordinato per ID all'interno della stessa categoria.
@@ -178,9 +199,11 @@ s nextForData(s);
  */
 s nextForUrg(s);
 
-/* =========================================================================
-   FUNZIONI DI INTERFACCIA E DISTRUZIONE
-   ========================================================================= */
+/** 
+ * =========================================================================
+ * FUNZIONI DI INTERFACCIA E DISTRUZIONE
+ * ========================================================================= 
+ */
 
 /**
  * @brief Avvia la procedura interattiva di acquisizione e inserimento di una nuova segnalazione.
@@ -206,5 +229,16 @@ void deleteGraph(Root);
  * @param searchString Stringa parziale digitata dall'utente nella barra di ricerca.
  */
 void search_seg(Root, const char *);
+
+/**
+ * @brief Modifica lo stato operativo di una segnalazione esistente aggiornando i flussi ortogonali.
+ * @pre root deve essere valido. currId deve essere presente nel sistema. newState deve essere compreso tra 0 e 2.
+ * @post Individua il nodo in O(1) tramite prefisso, lo sfila chirurgicamente dal vecchio binario di stato,
+ * aggiorna i contatori descrittivi di tracciamento e lo reinserisce in testa alla nuova lista di stato.
+ * @param root Il sistema di controllo principale.
+ * @param currId L'identificativo unico della segnalazione da alterare.
+ * @param newState Il codice numerico del nuovo stato (0: Aperta, 1: Risoluzione, 2: Chiusa).
+ */
+void modifySeg(Root, int32_t, int);
 
 #endif

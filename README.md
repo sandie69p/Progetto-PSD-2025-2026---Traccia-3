@@ -3,7 +3,7 @@
 </p>
 
 # 🏛️ Municipal Reporting System
-### *PSD Project 2025-2026 | Track 3*
+### *[PSD] Project 2025-2026 | Track 3*
 
 ---
 
@@ -39,6 +39,7 @@ The project is built on modern software engineering principles, focusing on **sc
 
 **Salvatore Pisu** (*sandie69p*)
 > **Individual Developer** | *Track 3*
+> **Portfolio:** https://web3solnet.sol.site
 
 ---
 

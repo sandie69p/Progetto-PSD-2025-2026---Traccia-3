@@ -50,7 +50,7 @@ void dashboard(Root sistema) {
   printf("\033[H\033[J");
     
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" #   %-47s #   %-49s # \n", "STATISTICHE GENERALI", "CONTEGGIO SEGNALAZIONI PER CATEGORIA");
+  printf(" #   %-47s #   %-49s # \n", " STATISTICHE GENERALI", "CONTEGGIO SEGNALAZIONI PER CATEGORIA");
   printf(" #---------------------------------------------------#-----------------------------------------------------# \n");
 
   printf(" #   - Numero segnalazioni comune:  %7d          #  - Illuminazione:  %7d                          # \n", 
@@ -82,12 +82,13 @@ void dashboard(Root sistema) {
 
   printf(" #   - Mostra segnalazioni per id:        4          #  - Inquinamento:   %7d                          # \n", 
     getSegCountByCategory(sistema, 9));
-
-  printf(" #   - Salvare ed uscire:                 0          #  - Sicurezza:      %7d                          # \n", 
+  
+  printf(" #   - Modifica stato segnalazione:       5          #  - Sicurezza:      %7d                          # \n", 
     getSegCountByCategory(sistema, 10));
+  printf(" #   - Salvare ed uscire:                 0          #  -------------------------------------------------- # \n");
 
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" #   Scelta: ");
+  printf(" #   - Scelta: ");
   fflush(stdout);
 }
 
@@ -216,4 +217,39 @@ void init_search_seg(Root root) {
 
   system("stty cooked echo");
   printf("\033[H\033[J");
+}
+
+void modifySegHud(Root root) {
+  if (root == NULL) return;
+
+  int32_t idTarget;
+  printf(" # --------- MODIFICA SEGNALAZIONE --------- # \n");
+  printf(" #   Inserisci ID segnalazione: ");
+
+  if (scanf("%d", &idTarget) != 1) {
+    while(getchar() != '\n');
+    printf(" # Errore: ID non valido.\n");
+    return;
+  }
+  getchar();
+
+  printf(" # Seleziona il nuovo stato:\n");
+  printf(" # 0) Aperta\n");
+  printf(" # 1) In Risoluzione\n");
+  printf(" # 2) Chiusa\n");
+  printf(" # Scelta: ");
+
+  int nuovoStato;
+  if (scanf("%d", &nuovoStato) != 1 || nuovoStato < 0 || nuovoStato > 2) {
+    while(getchar() != '\n');
+    printf(" # Errore: Stato non valido.\n");
+    return;
+  }
+  while(getchar() != '\n');
+
+  modifySeg(root, idTarget, nuovoStato);
+
+  printf(" # Stato modificato in RAM! Sarà permanente all'uscita (0).\n");
+  printf(" # Premi INVIO per continuare...");
+  getchar();
 }
