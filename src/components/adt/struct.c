@@ -121,7 +121,7 @@ Root init_root() {
 }
 
 // Ottieni categoria tramite prefisso
-int getCategoryIndex(int prefisso) {
+static int getCategoryIndex(int prefisso) {
   switch (prefisso) {
     case 10: return illuminazione;
     case 20: return rifiuti;
@@ -139,7 +139,7 @@ int getCategoryIndex(int prefisso) {
 } 
 
 // Inserisci segnalazione nel grafo
-bool insertOnGraph(Root r, s newSeg) {
+static bool insertOnGraph(Root r, s newSeg) {
   if (r == NULL || newSeg == NULL) return false;
 
   int prefisso = newSeg->id / 100000;
@@ -173,6 +173,7 @@ bool insertOnGraph(Root r, s newSeg) {
     if (urgIdx >= 0 && urgIdx < 5) {
       newSeg->nextUrg = r->urgenza->priority[urgIdx];
       r->urgenza->priority[urgIdx] = newSeg;
+      r->urgenza->nPrio[urgIdx]++;
     }
     
     r->totSegnalazioni++;
@@ -331,11 +332,16 @@ void init_sorting(Root r) {
   }
 
   quicksort(dataSeg, 0, n - 1, 3);
-  for(int i = 0; i < 5; i++) r->urgenza->priority[i] = NULL;
 
-  for(int i = n - 1; i >= 0; i--) {
+  for (int i = 0; i < 5; i++) {
+    r->urgenza->priority[i] = NULL;
+    r->urgenza->nPrio[i] = 0;
+  }
+
+  for (int i = n - 1; i >= 0; i--) {
     s nodo = dataSeg[i];
     int urgIdx = nodo->urgenza - 1;
+
     if (urgIdx >= 0 && urgIdx < 5) {
       nodo->nextUrg = r->urgenza->priority[urgIdx];
       r->urgenza->priority[urgIdx] = nodo;
@@ -596,7 +602,7 @@ void getNewSeg(Root root) {
   printf(" #   - 2) Rifiuti \n");
   printf(" #   - 3) Strade \n");
   printf(" #   - 4) Verde \n");
-  printf(" #   - 5) Incendio");
+  printf(" #   - 5) Incendio \n");
   printf(" #   - 6) Allagamento \n");
   printf(" #   - 7) Segnaletica \n");
   printf(" #   - 8) Edilizia \n");
@@ -822,23 +828,47 @@ void search_seg(Root r, const char *searchString) {
   while (curr && trovati < 12) {
     sprintf(idStr, "%d", curr->id);
 
+    int normalized = curr->data;
+    int giorno, mese, anno;
+    anno = (int) normalized / 10000;
+    normalized %= 10000;
+    mese = (int) normalized / 100;
+    normalized %= 100;
+    giorno = normalized;
+
+    char formattedData[16];
+    sprintf(formattedData, "%02d/%02d/%04d", giorno, mese, anno);
+
     if(strncmp(idStr, searchString, len) == 0) {
-      const char *statoStr = (curr->stato == 0) ? "Aperta" : (curr->stato == 1) ? "Risoluzione" : "Chiusa";
-      printf(" # | %-8d | %-15.15s | %-12.12s | P: %d | %-11s #\n", 
-        curr->id, 
-        curr->nome_cittadino, 
+      const char *statoStr;
+      switch(curr->stato) {
+        case 0:  statoStr = "Aperta";      break;
+        case 1:  statoStr = "Risoluzione"; break;
+        case 2:  statoStr = "Chiusa";      break;
+        default: statoStr = "N/D";         break;
+      }
+
+      char riga_dati[256];
+      sprintf(riga_dati, " | %-12d     | %-22.22s | %-10.10s   | %-13.13s | %-16.16s |   %d   |",
+        curr->id,
+        curr->nome_cittadino,
+        formattedData,
+        statoStr,
         curr->categoria, 
-        curr->urgenza, 
-        statoStr
+        curr->urgenza
       );
+
+      printf(" # %-101s # \n", riga_dati);
       trovati++;
     }
 
     curr = (catIdx == -1) ? curr->nextData : curr->nextId;
   }
 
-  for (int i = trovati; i < 12; i++) {
-    printf(" # |          |                 |              |      |             #\n");
+  for (int i = trovati; i < 11; i++) {
+    char riga_vuota[256];
+    sprintf(riga_vuota, " |                  |                        |              |               |                  |       |");
+    printf(" # %-101s # \n", riga_vuota);
   }
 }
 
@@ -853,23 +883,27 @@ int getMaxCat(Root root) {
     }
   }
 
+  if (root->id->nCat[maxIdx] == 0) return -1;
+
   return maxIdx;
 }
 
-const char *getMaxCatName(int catIdx) {
+const char *getMaxCatName(Root root) {
+  int catIdx = getMaxCat(root);
+
   switch (catIdx) {
     case illuminazione: return "Illuminazione";
-    case rifiuti: return "Rifiuti";
-    case strade: return "Strade";
-    case verde: return "Verde";
-    case incendio: return "Incendio";
-    case allagamento: return "Allagamento";
-    case segnaletica: return "Segnaletica";
-    case edilizia: return "Edilizia";
-    case randagismo: return "Randagismo";
-    case inquinamento: return "Inquinamento";
-    case sicurezza: return "Sicurezza";
-    default: return "N/D";
+    case rifiuti:       return "Rifiuti";
+    case strade:        return "Strade";
+    case verde:         return "Verde Pubblico";
+    case incendio:      return "Incendio";
+    case allagamento:   return "Allagamento";
+    case segnaletica:   return "Segnaletica";
+    case edilizia:      return "Edilizia";
+    case randagismo:    return "Randagismo";
+    case inquinamento:  return "Inquinamento";
+    case sicurezza:     return "Sicurezza";
+    default:            return "N/D";
   }
 }
 

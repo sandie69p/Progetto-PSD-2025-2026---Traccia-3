@@ -1,0 +1,30 @@
+=========================================================================
+          PORTALE URBANISTICO COMUNALE - REPORT STATISTICO GLOBALE       
+=========================================================================
+
+ * Volume Totale Segnalazioni Attive: 24999
+
+ * SPACCATO DEGLI STATI OPERATIVI:
+   - Segnalazioni in stato Aperto: 8350
+   - Segnalazioni in Risoluzione: 8172
+   - Segnalazioni in stato Chiuso: 8477
+
+ * INDICE DI CRITICITÀ:
+   - Segnalazioni Massima Urgenza (5): 5018
+
+ * DISTRIBUZIONE DETTAGLIATA PER CATEGORIA COMUNALE:
+   - Incendio                  : 2269
+   - Illuminazione             : 2311
+   - Rifiuti                   : 2235
+   - Strade                    : 2276
+   - Verde Pubblico            : 2337
+   - Allagamento               : 2235
+   - Segnaletica               : 2302
+   - Edilizia                  : 2248
+   - Randagismo                : 2247
+   - Inquinamento              : 2227
+   - Sicurezza                 : 2312
+
+ * AREA COMUNALE PIÙ COLPITA DA DISSERVIZI: Verde Pubblico
+
+=========================================================================

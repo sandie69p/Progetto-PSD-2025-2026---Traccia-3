@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Language-C99-blue.svg" alt="C99">
   <img src="https://img.shields.io/badge/Build-Makefile-orange.svg" alt="Makefile">
   <img src="https://img.shields.io/badge/Memory-Optimized-brightgreen.svg" alt="Memory Optimized">
-  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License">
+  <img src="https://img.shields.io/badge/License-AGPL--3.0-red.svg" alt="AGPL-3.0 License">
 </p>
 
 ---
@@ -35,6 +35,57 @@ The project is built on modern software engineering principles, focusing on **sc
 
 ---
 
+## ⚙️ Features
+
+- Interactive terminal dashboard
+- Binary database loading and persistence
+- Multi-index navigation by category, date, status and urgency
+- Live incremental search by ID/category prefix
+- Controlled report removal with persistent database update
+- Status update workflow for municipal reports
+- Statistical report generation
+- Valgrind-tested heap deallocation with 0 memory leaks
+
+---
+
+## 🧪 Testing & Memory Safety
+
+The project includes an automated test executable that validates the core ADT operations:
+
+- report registration and structural consistency
+- search on existing and non-existing records
+- priority management
+- filtered navigation by category prefix
+- status update across orthogonal indices
+- statistical report generation
+- full heap deallocation
+
+The test suite was executed under Valgrind, reporting:
+
+```text
+==5726== HEAP SUMMARY:
+==5726==     in use at exit: 0 bytes in 0 blocks
+==5726==   total heap usage: 25,013 allocs, 25,013 frees, 30,206,376 bytes allocated
+==5726==
+==5726== All heap blocks were freed -- no leaks are possible
+==5726==
+==5726== For lists of detected and suppressed errors, rerun with: -s
+==5726== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+```
+---
+
+## 🧭 Roadmap & Planned Improvements
+
+After the official university submission, the project may be extended with additional development-oriented features, including:
+
+- **Doxygen documentation generation**, to automatically produce structured technical documentation from the annotated header files.
+- **Python database generator**, used to create large synthetic datasets of municipal reports for testing, benchmarking and demonstration purposes.
+- **Extended test coverage**, with additional edge cases for invalid input, corrupted records and stress testing.
+- **Improved reporting module**, with optional export formats and more detailed statistical summaries.
+
+These improvements are planned as post-submission enhancements and are not required to run the current stable version of the project.
+
+---
 ## 👤 Developer
 
 **Salvatore Pisu** (*sandie69p*)

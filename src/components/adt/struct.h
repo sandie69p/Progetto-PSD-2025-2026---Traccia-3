@@ -136,22 +136,22 @@ const char *getDesc(s);
 const char *getCat(s);
 
 /**
- * @brief Identifica la categoria del comune che registra l'affluenza massima di problemi.
- * @pre root deve essere un puntatore Root valido, non vuoto e inizializzato.
- * @post Scansiona l'indice di categoria calcolando il picco massimo di segnalazioni.
- * @param root Il sistema di controllo principale.
- * @return L'indice numerico (catId) della categoria più colpita, -1 se il sistema è vuoto o invalido.
+ * @brief Identifica l'indice numerico della categoria che registra il picco massimo di segnalazioni attive.
+ * @pre root deve essere un puntatore valido alla struttura di controllo principale, non nullo e inizializzato.
+ * @post Scansiona l'array statico dei contatori delle categorie (nCat) calcolando l'indice con il valore piu' alto.
+ * @param root Il sistema di controllo principale (struttura opaca).
+ * @return L'indice numerico intero (da 0 a allCat-1) della categoria piu' colpita, oppure -1 se il sistema e' vuoto o privo di segnalazioni.
  */
 int getMaxCat(Root);
 
 /**
- * @brief Converte l'indice enumerato di una categoria nella sua rispettiva stringa letterale.
- * @pre idx deve essere un valore coerente con l'intervallo dell'enum catId (da 0 a allCat-1).
- * @post Associa l'indice alla stringa testuale statica corrispondente.
- * @param idx L'indice numerico della categoria da convertire.
- * @return Stringa costante (const char*) contenente il nome della categoria (es. "Illuminazione").
+ * @brief Determina ed estrae la stringa letterale corrispondente alla categoria comunale piu' segnalata.
+ * @pre root deve essere un puntatore valido alla struttura di controllo principale, non nullo e inizializzato.
+ * @post Invoca internamente getMaxCat per ottenere l'indice dominante e lo traduce in una stringa costante mediante costrutto selettivo.
+ * @param root Il sistema di controllo principale (struttura opaca).
+ * @return Stringa costante (const char*) contenente il nome letterale della categoria (es. "Verde Pubblico"), oppure "N/D" se il sistema e' vuoto.
  */
-const char *getMaxCatName(int);
+const char *getMaxCatName(Root);
 
 /**
  * @brief Restituisce la data nel formato raw intero (AAAAMMGG).

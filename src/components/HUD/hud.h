@@ -60,8 +60,12 @@ void showSeg(Root);
 void init_search_seg(Root);
 
 /**
- * @note da inserire
-*/
+ * @brief Interfaccia testuale per la modifica dello stato di una segnalazione.
+ * @pre root deve essere un puntatore Root valido e popolato.
+ * @post Acquisisce ID e nuovo stato da stdin, valida l'input e invoca modifySeg
+ * per aggiornare il nodo e reinserirlo nel corretto indice di stato.
+ * @param root Il sistema su cui effettuare la modifica.
+ */
 void modifySegHud(Root);
 
 /**

@@ -3,6 +3,8 @@ CFLAGS = -Wall -Wextra -g -I./components/HUD -I./components/adt
 
 TARGET = municipal_system
 
+TEST = ./test/main.t.c
+
 OBJ_DIR = components/object
 
 OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/hud.o $(OBJ_DIR)/struct.o
@@ -25,6 +27,20 @@ $(OBJ_DIR)/struct.o: components/adt/struct.c components/adt/struct.h
 clean:
 	rm -f $(TARGET) $(OBJS)
 	rm -rf $(OBJ_DIR)
+	rm -f test/unit_test
 
 run: $(TARGET)
 	./$(TARGET)
+
+valgrind: $(TARGET)
+	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)
+
+debug: $(TARGET)
+	gdb ./$(TARGET)
+
+.PHONY: clean run valgrind debug test
+
+test: $(OBJ_DIR)/struct.o
+	$(CC) $(CFLAGS) $(TEST) $(OBJ_DIR)/struct.o -o test/unit_test
+	valgrind --leak-check=full --show-leak-kinds=all ./test/unit_test
+	@rm -f test/unit_test

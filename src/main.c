@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <signal.h>
 
 #include "./components/HUD/hud.h"
 #include "./components/adt/struct.h"
@@ -36,7 +37,15 @@ Root sistema =  NULL;
  */
 void init();
 
+/**
+ * @brief Gestore asincrono dei segnali di interruzione (Ctrl+C).
+ * @param signum Il codice del segnale intercettato (SIGINT).
+ */
+void handle_signal(int);
+
 int main(void) {
+  signal(SIGINT, handle_signal);
+
   init();
 
   while(1) {
@@ -44,6 +53,7 @@ int main(void) {
     dashboard(sistema);
   
     int choise;
+    printf(" #   - Scelta: ");
     if (scanf("%d", &choise) != 1) {
         while(getchar() != '\n');
         continue;
@@ -75,4 +85,14 @@ void init() {
   printf(" #   - Tempo impiegato %.8f secondi per\n", time);
   printf(" #   - Premi INVIO per entrare nel portale...");
   getchar();
+}
+
+void handle_signal(int signum) {
+    if (signum == SIGINT) {
+        printf("\n\n # [SICUREZZA] Intercettato Ctrl+C! Riasciugatura database e svuotamento RAM in corso...\n");
+        if (sistema != NULL) {
+            salvataggio(sistema); // Fa save_records() e deleteGraph() con l'animazione!
+        }
+        exit(0); // Esce in modo pulito restituendo 0 al sistema operativo
+    }
 }

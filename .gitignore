@@ -1,2 +1,8 @@
 *.out
 *.o
+
+src/municipal_system
+
+# Doxygen config locale
+docs/Doxyfile
+docs/doxygen/
