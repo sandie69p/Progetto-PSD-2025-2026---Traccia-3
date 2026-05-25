@@ -59,11 +59,11 @@ static void getReport(Root sistema) {
 
 void salvataggio(Root sistema) {
   if (sistema == NULL) {
-      printf(" # [AVVISO] Nessun sistema attivo da salvare.\n");
+      printf(" # | [AVVISO] Nessun sistema attivo da salvare.\n");
       exit(0);
   }
 
-  printf(" #-----Salvataggio in corso...-----------------------# \n");
+  printf(" #    - Salvataggio in corso...                      # \n");
 
   save_records(sistema);
 
@@ -89,14 +89,13 @@ void salvataggio(Root sistema) {
     usleep(20000);
   }
 
-  printf("\n # [INFO] Liberazione della memoria dinamica (Svuotamento Heap RAM)...\n");
+  printf("\n # | [INFO] Liberazione della memoria dinamica (Svuotamento Heap RAM)...                                 | # \n");
   deleteGraph(sistema);
-  printf(" # [ OK ] Grafo multi-indice deallocato con successo (0 leak).\n");
+  printf(" # | [ OK ] Grafo multi-indice deallocato con successo (0 leak).                                         | # \n");
 
-  printf(" # [INFO] Chiusura del processo in corso...\n");
+  printf(" # | [INFO] Chiusura del processo in corso...                                                            | # \n");
   usleep(500000);
 
-  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
   exit(0);
 }
 
@@ -106,7 +105,7 @@ void dashboard(Root sistema) {
         return;
     }
 
-    printf("\033[H\033[J");
+    system("clear");
     
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
     printf(" #   %-47s #    %-48s # \n", " STATISTICHE GENERALI", "CONTEGGIO SEGNALAZIONI PER CATEGORIA");
@@ -230,16 +229,13 @@ void showSeg(Root root) {
 void insertNewSeg(Root root) {
   if (root == NULL) return;
 
-  printf("\033[H\033[J");
+  system("clear");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
   printf(" # |------------------------------------- ACQUISIZIONE NUOVA SEGNALAZIONE ------------------------------| # \n");
   printf(" #                                                                                                       # \n");
-  
-  int c;
-  while ((c = getchar()) != '\n' && c != EOF);
 
-  getNewSeg(root);
-  
+  getNewSeg(root); 
+
   printf(" #                                                                                                       # \n");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
 }
@@ -249,23 +245,23 @@ void removeSeg(Root root) {
 
   printf("\033[H\033[J");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" # |------------------------------------- RIMOZIONE SEGNALAZIONE COMUNALE ------------------------------| # \n");
-  printf(" #                                                                                                       # \n");
+  printf(" # |------------------------------------- RIMOZIONE SEGNALAZIONE COMUNALE -------------------------------| # \n");
+  printf(" # |                                                                                                     | # \n");
   
   char riga_prompt[128];
   sprintf(riga_prompt, " Inserisci il codice numerico identificativo (ID) da eliminare permanentemente: ");
-  printf(" # %-101s # \n", riga_prompt);
-  printf(" #                                                                                                       # \n");
+  printf(" # |%-101s| # \n", riga_prompt);
+  printf(" # |                                                                                                     | # \n");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
   printf(" # Scelta ID per rimozione: ");
   fflush(stdout);
 
   int idTarget;
   if (scanf("%d", &idTarget) != 1) {
-    printf("\n # [ERRORE RIGIDO] L'ID inserito deve contenere unicamente cifre numeriche!                            # \n");
+    printf(" # [ERRORE RIGIDO] L'ID inserito deve contenere unicamente cifre numeriche!                              | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # Premi INVIO per annullare e ritornare alla dashboard...                                               # \n");
+    printf(" # Premi INVIO per annullare e ritornare alla dashboard...                                               | # \n");
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
     getchar();
     return;
@@ -273,18 +269,18 @@ void removeSeg(Root root) {
 
   int residuo = getchar();
   if (residuo != '\n' && residuo != EOF) {
-    printf("\n # [ERRORE RIGIDO] Input corrotto! Rilevati caratteri alfabetici illegali accodati all'ID.               # \n");
+    printf(" # [ERRORE RIGIDO] Input corrotto! Rilevati caratteri alfabetici illegali accodati all'ID.               | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # Premi INVIO per annullare e ritornare alla dashboard...                                               # \n");
+    printf(" # Premi INVIO per annullare e ritornare alla dashboard...                                               | # \n");
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
     getchar();
     return;
   }
 
   if (idTarget < 0 || idTarget > 2199999) {
-    printf("\n # [ERRORE RIGIDO] ID inserito fuori range o non conforme ai parametri del comune!                     # \n");
-    printf(" # Premi INVIO per annullare e ritornare alla dashboard...                                               # \n");
+    printf(" # [ERRORE RIGIDO] ID inserito fuori range o non conforme ai parametri del comune!                       | # \n");
+    printf(" # Premi INVIO per annullare e ritornare alla dashboard...                                               | # \n");
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
     getchar();
     return;
@@ -298,21 +294,21 @@ void removeSeg(Root root) {
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
   
   if (totale_dopo < totale_prima) {
-    printf(" # |--------------------------------- OPERAZIONE COMPLETATA CON SUCCESSO -----------------------------| # \n");
-    printf(" #                                                                                                       # \n");
+    printf(" # |--------------------------------- OPERAZIONE COMPLETATA CON SUCCESSO ------------------------------| # \n");
+    printf(" # |                                                                                                   | # \n");
     char riga_successo[128];
     sprintf(riga_successo, " [ OK ] Segnalazione ID %d estirpata correttamente da tutti i flussi ortogonali in RAM.", idTarget);
     printf(" # %-101s # \n", riga_successo);
   } else {
-    printf(" # |----------------------------------------- OPERAZIONE FALLITA ---------------------------------------| # \n");
-    printf(" #                                                                                                       # \n");
+    printf(" # |---------------------------------------- OPERAZIONE FALLITA ---------------------------------------| # \n");
+    printf(" # |                                                                                                   | # \n");
     char riga_fallimento[128];
     sprintf(riga_fallimento, " [AVVISO] Nessuna eliminazione effettuata. L'ID %d non e' presente nel database locale.", idTarget);
     printf(" # %-101s # \n", riga_fallimento);
   }
 
-  printf(" #                                                                                                       # \n");
-  printf(" # Premi INVIO per confermare e tornare alla dashboard principale...                                     # \n");
+  printf(" # |                                                                                                   | # \n");
+  printf(" # Premi INVIO per confermare e tornare alla dashboard principale...                                   | # \n");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
   getchar();
 }
@@ -373,91 +369,103 @@ void modifySegHud(Root root) {
   
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
   printf(" # |------------------------------------- MODIFICA STATO SEGNALAZIONE -----------------------------------| # \n");
-  printf(" # |-----------------------------------------------------------------------------------------------------| # \n");
+  printf(" # |                                                                                                     | # \n");
 
   int32_t idTarget;
   char riga_prompt[128];
-  sprintf(riga_prompt, "|---- Inserisci ID della segnalazione comunale: ------------------------------------------------------|");
-  printf(" # %-101s # \n", riga_prompt);
-  printf(" # |-----------------------------------------------------------------------------------------------------| # \n");
-  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" # Scelta ID: ");
+  sprintf(riga_prompt, " Inserisci ID della segnalazione comunale: ");
+  printf(" # |%-101s| # \n", riga_prompt);
+  printf(" # |                                                                                                     | # \n");
+  printf(" # | Scelta ID: ");
   fflush(stdout);
 
-  if (scanf("%d", &idTarget) != 1) {
-    printf("\n # [ERRORE RIGIDO] L'ID deve essere composto esclusivamente da cifre numeriche!                          # \n");
+  if (scanf("%d", &idTarget) != 1 || idTarget < 1000000 || idTarget > 2199999) {
+    printf("\n # | [ERRORE RIGIDO] ID non conforme! Deve essere numerico e compreso tra 1000000 e 2199999.           | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # Premi INVIO per annullare l'operazione e tornare alla dashboard...                                    # \n");
-    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                | # \n");
     getchar();
     return;
   }
 
   int residuo_id = getchar();
   if (residuo_id != '\n' && residuo_id != EOF) {
-    printf("\n # [ERRORE RIGIDO] Input non conforme! Rilevato testo alfabetico illegale accodato all'ID.               # \n");
+    printf("\n # | [ERRORE RIGIDO] Input non conforme! Rilevato testo alfabetico illegale accodato all'ID.           | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # Premi INVIO per annullare l'operazione e tornare alla dashboard...                                    # \n");
-    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                | # \n");
     getchar();
     return;
   }
 
   printf("\033[H\033[J");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" # |------------------------------------- SELEZIONE NUOVO STATO OPERATIVO ------------------------------| # \n");
+  printf(" # |------------------------------------- SELEZIONE NUOVO STATO OPERATIVO -------------------------------| # \n");
   
   char riga_target[128];
   sprintf(riga_target, " Modifica in corso per la segnalazione ID: %d", idTarget);
-  printf(" # %-101s # \n", riga_target);
-  printf(" #-------------------------------------------------------------------------------------------------------# \n");
-  printf(" #  0) APERTA                                                                                            # \n");
-  printf(" #  1) IN RISOLUZIONE                                                                                    # \n");
-  printf(" #  2) CHIUSA                                                                                            # \n");
-  printf(" #                                                                                                       # \n");
-  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" # Inserisci codice stato (0-2): ");
+  printf(" # |%-101s| # \n", riga_target);
+  printf(" # |                                                                                                     | # \n");
+  printf(" # | 0) APERTA                                                                                           | # \n");
+  printf(" # | 1) IN RISOLUZIONE                                                                                   | # \n");
+  printf(" # | 2) CHIUSA                                                                                           | # \n");
+  printf(" # |                                                                                                     | # \n");
+  printf(" # | Inserisci codice stato (0-2): ");
   fflush(stdout);
 
   int nuovoStato;
   if (scanf("%d", &nuovoStato) != 1 || nuovoStato < 0 || nuovoStato > 2) {
-    printf("\n # [ERRORE RIGIDO] Stato non valido! Scegliere unicamente una delle opzioni censite (0, 1, 2).            # \n");
+    printf("\n # | [ERRORE RIGIDO] Stato non valido! Scegliere unicamente una delle opzioni censite (0, 1, 2).        | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # Premi INVIO per annullare l'operazione e tornare alla dashboard...                                    # \n");
-    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                 | # \n");
     getchar();
     return;
   }
 
   int residuo_stato = getchar();
   if (residuo_stato != '\n' && residuo_stato != EOF) {
-    printf("\n # [ERRORE RIGIDO] Scelta corrotta da caratteri alfabetici non consentiti!                               # \n");
+    printf("\n # | [ERRORE RIGIDO] Scelta corrotta da caratteri alfabetici non consentiti!                             | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # Premi INVIO per annullare l'operazione e tornare alla dashboard...                                    # \n");
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                  | # \n");
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
     getchar();
     return;
   }
 
-  modifySeg(root, idTarget, nuovoStato);
+  int esito_modifica = modifySeg(root, idTarget, nuovoStato);
 
   printf("\033[H\033[J");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
-  printf(" # |--------------------------------- AGGIORNAMENTO COMPLETATO CON SUCCESSO -----------------------------| # \n");
-  printf(" #                                                                                                       # \n");
-  
-  char riga_successo[128];
-  sprintf(riga_successo, " [ OK ] Stato della segnalazione %d modificato correttamente in RAM locale.", idTarget);
-  printf(" # %-101s # \n", riga_successo);
-  
-  printf(" #   I cambiamenti saranno resi persistenti sul file database binario solo alla chiusura (0).            # \n");
-  printf(" #                                                                                                       # \n");
-  printf(" # Premi INVIO per confermare e tornare alla dashboard principale...                                     # \n");
-  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+
+  if (esito_modifica == 1) {
+    printf(" # |--------------------------------- AGGIORNAMENTO COMPLETATO CON SUCCESSO -----------------------------| # \n");
+    printf(" # |                                                                                                     | # \n");
+    char riga_successo[128];
+    sprintf(riga_successo, " [ OK ] Stato della segnalazione %d modificato correttamente in RAM locale. ", idTarget);
+    printf(" # |%-101s| # \n", riga_successo);
+    printf(" # | I cambiamenti saranno resi persistenti sul file database binario solo alla chiusura (0).            | # \n");
+  } 
+  else if (esito_modifica == 0) {
+    printf(" # |------------------------------------- OPERAZIONE NON NECESSARIA -------------------------------------| # \n");
+    printf(" # |                                                                                                     | # \n");
+    char riga_warning[128];
+    sprintf(riga_warning, " # [AVVISO] La segnalazione %5d possiede gia' lo stato operativo selezionato.           | #", idTarget);
+    printf(" # |%-101s| # \n", riga_warning);
+    printf(" # | Nessuna operazione di riposizionamento eseguita sugli indici del grafo.                             | # \n");
+  } 
+  else {
+    printf(" # |----------------------------------------- OPERAZIONE FALLITA ----------------------------------------| # \n");
+    printf(" # |                                                                                                     | # \n");
+    char riga_errore[128];
+    sprintf(riga_errore, " # [ERRORE] Impossibile procedere. L'ID %d non e' presente nel database locale. # ", idTarget);
+    printf(" # |%-101s| # \n", riga_errore);
+    printf(" # | Verificare la presenza dell'ID tramite il pannello delle statistiche generali.                      | # \n");
+  }
+
+  printf(" # |                                                                                                     | # \n");
+  printf(" # | Premi INVIO per confermare e tornare alla dashboard principale...                                   | # \n");
   getchar();
 }
 

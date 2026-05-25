@@ -53,7 +53,7 @@ int main(void) {
     dashboard(sistema);
   
     int choise;
-    printf(" #   - Scelta: ");
+    printf(" #    - Scelta: ");
     if (scanf("%d", &choise) != 1) {
         while(getchar() != '\n');
         continue;

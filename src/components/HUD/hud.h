@@ -11,71 +11,99 @@
  * formattati, tabelle geometriche allineate e cattura dell'input in tempo reale.
  */
 
+/* =========================================================================
+   INTERFACCIA UTENTE ED EMISSIONE CRUSCOTTI GRAFICI
+   ========================================================================= */
+
 /**
  * @brief Rendering della Dashboard principale del sistema.
- * @pre sistema deve essere un puntatore Root valido e inizializzato.
- * @post Pulisce interamente lo schermo del terminale ed emette la griglia grafica
- * contenente i contatori globali, i dati per categoria e il menu delle scelte.
- * @param sistema La radice del sistema da cui campionare le statistiche in tempo reale.
+ * * Pulisce lo schermo del terminale ed emette la griglia grafica contenente
+ * i contatori globali aggregati, la ripartizione numerica per singola categoria 
+ * e il menu di selezione delle funzionalità principali.
+ * * @pre sistema deve essere un puntatore valido alla struttura di controllo Root (non nullo e inizializzato).
+ * @post I dati attuali del grafo multi-indice vengono formattati e stampati a video. Lo stato della RAM rimane invariato.
+ * @note Invia esplicitamente il flush allo stream di output per garantire l'immediatezza del rendering visivo.
+ * @param sistema Il puntatore opaco alla radice del sistema da cui campionare le statistiche live.
+ * @return void
  */
-void dashboard(Root);
+void dashboard(Root sistema);
+
 
 /**
- * @brief Avvia la procedura guidata per l'acquisizione di una nuova segnalazione.
- * @pre root deve essere un puntatore Root valido.
- * @post Invocando internamente getNewSeg, acquisisce da stdin i campi della segnalazione,
- * alloca il nodo, aggiorna gli indici in RAM e scrive il record in append su disco.
- * @param root Il sistema in cui inserire la nuova segnalazione.
+ * @brief Inizializza la schermata visiva per l'acquisizione di una nuova segnalazione.
+ * * Esegue la pulizia del terminale e la formattazione dei banni superiori dell'HUD,
+ * per poi cedere immediatamente il controllo algoritmico al modulo ADT per l'acquisizione.
+ * * @pre root deve essere un puntatore valido alla struttura di controllo Root (non nullo e inizializzato).
+ * @post Se l'inserimento ha successo, il grafo in RAM viene espanso, le statistiche aggiornate e il record serializzato su disco.
+ * @note La funzione incapsula la chiamata a getNewSeg(Root) per rispettare i vincoli di Information Hiding sulle dimensioni dei nodi.
+ * @param root Il sistema di controllo principale in cui inserire e registrare il nuovo record.
+ * @return void
  */
-void insertNewSeg(Root);
+void insertNewSeg(Root root);
+
 
 /**
- * @brief Interfaccia interattiva per la rimozione controllata di una segnalazione.
- * @pre root deve essere un puntatore Root valido.
- * @post Richiede l'ID a stdin. Se l'ID è sintatticamente valido, invoca init_removeSeg
- * per estirpare il nodo dai 4 indici ortogonali in memoria e decrementare i contatori.
- * @param root Il sistema da cui eliminare il record.
+ * @brief Interfaccia testuale interattiva per la rimozione controllata di una segnalazione.
+ * * Richiede l'inserimento dell'ID da tastiera, esegue una validazione difensiva rigida 
+ * anti-carattere e, in caso di matching, invoca le routine di sfoltimento dei canali ortogonali.
+ * * @pre root deve essere un puntatore valido alla struttura di controllo Root (non nullo e inizializzato).
+ * @post Se l'ID esiste, il record viene estirpato da tutti e 4 gli indici logici, l'Heap liberata e i contatori decrementati.
+ * @note Svuota preventivamente il buffer dello stream stdin in caso di inserimenti alfabetici non conformi o fuori range.
+ * @param root Il sistema di controllo principale da cui sfoltire il record mirato.
+ * @return void
  */
-void removeSeg(Root);
+void removeSeg(Root root);
+
 
 /**
- * @brief Visualizza una tabella ordinata contenente le prime 20 segnalazioni.
- * @pre root deve essere un puntatore Root valido.
- * @post Stampa a schermo l'intestazione allineata e invoca getSeg su ciascuno dei 
- * primi 20 nodi estratti dall'indice cronologico (ordinamento per Data).
- * @note Blocca l'esecuzione con una richiesta di INVIO (getchar) per consentire la lettura.
- * @param root Il sistema da cui campionare la testa cronologica.
+ * @brief Visualizza una tabella geometrica formattata contenente le prime 20 segnalazioni.
+ * * Scansiona l'indice cronologico globale partendo dalla testa del sotto-nodo temporale
+ * e stampa i record formattati simulando un'impaginazione fissa di sistema.
+ * * @pre root deve essere un puntatore valido alla struttura di controllo Root (non nullo e inizializzato).
+ * @post Genera l'output tabellare a video. Sblocca l'interfaccia solo dopo una conferma cosciente dell'utente.
+ * @note Blocca temporaneamente l'esecuzione del thread mediante getchar() per consentire la lettura dei dati da terminale.
+ * @param root Il sistema di controllo principale da cui campionare la testa dell'ordinamento per data.
+ * @return void
  */
-void showSeg(Root);
+void showSeg(Root root);
+
 
 /**
- * @brief Attiva il motore di ricerca live e incrementale a terminale.
- * @pre root deve essere un puntatore Root valido e popolato.
- * @post Altera lo stato del terminale in modalità non-canonica (stty -icanon -echo).
- * Ad ogni carattere digitato, aggiorna dinamicamente la tabella filtrando per ID
- * o prefisso di Categoria in tempo reale. Al termine (tasto ESC), ripristina il terminale (stty cooked echo).
- * @note Sfrutta sequenze di escape ANSI per il posizionamento del cursore senza sfarfallio.
- * @param root Il sistema su cui effettuare il filtraggio dinamico dei nodi.
+ * @brief Attiva il motore di ricerca live, incrementale e asincrono a terminale.
+ * * Modifica lo stato del terminale Linux disattivando la modalità canonica e l'eco locale.
+ * Filtra istantaneamente l'albero dei nodi ad ogni singolo carattere digitato dall'operatore.
+ * * @pre root deve essere un puntatore valido alla struttura di controllo Root, non nullo e popolato.
+ * @post Restituisce a video la sotto-tabella filtrata in tempo reale. Al termine, ripristina la modalità canonica di Arch.
+ * @note Intercetta le sequenze di escape dei tasti speciali (ESC = 27 per uscire, BACKSPACE = 127/8 per cancellare).
+ * @param root Il sistema di controllo principale su cui effettuare la query incrementale per ID o categoria.
+ * @return void
  */
-void init_search_seg(Root);
+void init_search_seg(Root root);
+
 
 /**
- * @brief Interfaccia testuale per la modifica dello stato di una segnalazione.
- * @pre root deve essere un puntatore Root valido e popolato.
- * @post Acquisisce ID e nuovo stato da stdin, valida l'input e invoca modifySeg
- * per aggiornare il nodo e reinserirlo nel corretto indice di stato.
- * @param root Il sistema su cui effettuare la modifica.
+ * @brief Interfaccia testuale per la modifica dello stato operativo di una segnalazione.
+ * * Acquisisce l'ID target e il nuovo codice di stato, valida la conformità dei range 
+ * ed esegue il re-indirizzamento ortogonale dei puntatori legati alla sottomatrice di stato.
+ * * @pre root deve essere un puntatore valido alla struttura di controllo Root, non nullo e popolato.
+ * @post Notifica visivamente l'esito della transizione (Successo, Operazione non necessaria, ID Inesistente).
+ * @note Si interfaccia direttamente con i codici di ritorno (-1, 0, 1) restituiti dall'algoritmo di splicing dell'ADT.
+ * @param root Il sistema di controllo principale su cui invocare la mutazione di stato.
+ * @return void
  */
-void modifySegHud(Root);
+void modifySegHud(Root root);
+
 
 /**
- * @brief Consolda i dati su disco, dealloca il grafo e spegne l'applicazione.
- * @pre sistema deve essere un puntatore Root valido.
- * @post Invoca save_records per riscrivere il database binario pulito, chiama deleteGraph
- * per azzerare l'Heap (0 leak), esegue un'animazione grafica di caricamento e termina il processo.
- * @note Questa funzione non ritorna mai al chiamante, ma effettua una exit(0) deterministica.
- * @param sistema Il sistema finale da salvare e distruggere.
+ * @brief Consolida i dati su disco, azzera la memoria dinamica RAM e spegne il processo.
+ * * Invocata come opzione di sblocco finale, forza la riscrittura del database binario, 
+ * dealloca le strutture tramite algoritmo di demolizione controllata ed esegue il clean dell'ambiente.
+ * * @pre sistema deve essere un puntatore valido alla struttura di controllo Root (non nullo).
+ * @post Il file binario viene aggiornato e chiuso. Tutta la memoria Heap associata al grafo viene azzerata (0 leak).
+ * @note Questa funzione interrompe drasticamente l'applicazione invocando una exit(0) deterministica; non ritorna mai al chiamante.
+ * @param sistema Il sistema finale da serializzare, ripulire e spegnere.
+ * @return void
  */
-void salvataggio(Root);
+void salvataggio(Root sistema);
 
 #endif

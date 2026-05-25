@@ -1,5 +1,6 @@
 *.out
 *.o
+*.py
 
 src/municipal_system
 

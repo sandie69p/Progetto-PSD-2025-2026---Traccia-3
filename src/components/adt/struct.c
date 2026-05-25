@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <time.h>
 #include "./struct.h"
 
 /**
@@ -191,7 +192,7 @@ void init_loadingDb(Root r, const char *fileName) {
     s nuova = (s) calloc(1, sizeof(struct segnalazione));
     if (!nuova) { fclose(f); return; }
 
-    if (fread(&nuova->id, sizeof(int), 1, f) != 1) {
+    if (fread(&nuova->id, sizeof(int32_t), 1, f) != 1) {
       free(nuova);
       break;
     }
@@ -322,12 +323,15 @@ void init_sorting(Root r) {
     if (nodo->stato == 0) {
       nodo->nextStato = r->stato->aperto->head;
       r->stato->aperto->head = nodo;
+
     } else if (nodo->stato == 1) {
       nodo->nextStato = r->stato->risoluzione->head;
       r->stato->risoluzione->head = nodo;
+
     } else if (nodo->stato == 2) {
       nodo->nextStato = r->stato->chiuso->head;
       r->stato->chiuso->head = nodo;
+      
     }
   }
 
@@ -507,7 +511,7 @@ void appendNewSeg(s newSeg, const char *fileName) {
   FILE *f = fopen(fileName, "ab");
   if (f == NULL) { perror("Errore nell'apertura!"); return; }
 
-  fwrite(&newSeg->id, sizeof(int), 1, f);
+  fwrite(&newSeg->id, sizeof(int32_t), 1, f);
   fwrite(newSeg->nome_cittadino, sizeof(char), 64, f);
   fwrite(newSeg->categoria, sizeof(char), 64, f);
   fwrite(newSeg->descrizione, sizeof(char), 1024, f);
@@ -517,7 +521,7 @@ void appendNewSeg(s newSeg, const char *fileName) {
 
   fclose(f);
 
-  printf("[FILE] Segnalazione registrata con successo!");
+  printf(" # | [FILE] Segnalazione registrata con successo!");
 }
 
 // Acquisisci posizione
@@ -592,7 +596,7 @@ void getPosition(Root root, s newSeg, int catIdx) {
 
 // Prendi nuova segnalazione
 void getNewSeg(Root root) {
-  int giorno, mese, anno, scelta;
+  int scelta;
 
   s newSeg = (s) calloc(1, sizeof(struct segnalazione));
   if (newSeg == NULL) return;
@@ -610,60 +614,32 @@ void getNewSeg(Root root) {
   printf(" #   - 10) Inquinamento \n");
   printf(" #   - 11) Sicurezza \n");
   printf(" #   - Scelta: ");
-  scanf("%d", &scelta);
-  getchar();
+  fflush(stdout);
+  
+  if (scanf("%d", &scelta) != 1 || scelta < 1 || scelta > 11) {
+    printf("\n # | [ERRORE RIGIDO] Codice categoria non valido o non numerico!                                      | # \n");
+    goto input_error;
+  }
+
+  int clean_buffer;
+  while ((clean_buffer = getchar()) != '\n' && clean_buffer != EOF);
 
   int catIdx = scelta - 1;
   int prefisso = 0;
 
   switch (catIdx) {
-    case illuminazione: {
-      prefisso = 10; strcpy(newSeg->categoria, "Illuminazione"); 
-    } break;
-
-    case rifiuti: { 
-      prefisso = 20; strcpy(newSeg->categoria, "Rifiuti"); 
-    } break;
-
-    case strade: { 
-      prefisso = 30; strcpy(newSeg->categoria, "Strade"); 
-    } break;
-
-    case verde: { 
-      prefisso = 40; strcpy(newSeg->categoria, "Verde"); 
-    } break;
-
-    case incendio: { 
-      prefisso = 50; strcpy(newSeg->categoria, "Incendio"); 
-    } break;
-
-    case allagamento: { 
-      prefisso = 60; strcpy(newSeg->categoria, "Allagamento"); 
-    } break;
-
-    case segnaletica: { 
-      prefisso = 70; strcpy(newSeg->categoria, "Segnaletica"); 
-    } break;
-
-    case edilizia: { 
-      prefisso = 80; strcpy(newSeg->categoria, "Edilizia"); 
-    } break;
-
-    case randagismo: { 
-      prefisso = 90; strcpy(newSeg->categoria, "Randagismo"); 
-    } break;
-
-    case inquinamento: { 
-      prefisso = 11; strcpy(newSeg->categoria, "Inquinamento"); 
-    } break;
-
-    case sicurezza: { 
-      prefisso = 21; strcpy(newSeg->categoria, "Sicurezza"); 
-    } break;
-
-    default: { 
-      prefisso = 0; 
-    } break;
+    case illuminazione: { prefisso = 10; strcpy(newSeg->categoria, "Illuminazione"); } break;
+    case rifiuti:       { prefisso = 20; strcpy(newSeg->categoria, "Rifiuti"); } break;
+    case strade:        { prefisso = 30; strcpy(newSeg->categoria, "Strade"); } break;
+    case verde:         { prefisso = 40; strcpy(newSeg->categoria, "Verde"); } break;
+    case incendio:      { prefisso = 50; strcpy(newSeg->categoria, "Incendio"); } break;
+    case allagamento:   { prefisso = 60; strcpy(newSeg->categoria, "Allagamento"); } break;
+    case segnaletica:   { prefisso = 70; strcpy(newSeg->categoria, "Segnaletica"); } break;
+    case edilizia:      { prefisso = 80; strcpy(newSeg->categoria, "Edilizia"); } break;
+    case randagismo:    { prefisso = 90; strcpy(newSeg->categoria, "Randagismo"); } break;
+    case inquinamento:  { prefisso = 11; strcpy(newSeg->categoria, "Inquinamento"); } break;
+    case sicurezza:     { prefisso = 21; strcpy(newSeg->categoria, "Sicurezza"); } break;
+    default:            { prefisso = 0; } break;
   }
 
   newSeg->id = getRandomId(root, prefisso, catIdx);
@@ -676,21 +652,36 @@ void getNewSeg(Root root) {
   fgets(newSeg->descrizione, 1024, stdin);
   newSeg->descrizione[strcspn(newSeg->descrizione, "\n")] = 0;
 
-  printf(" #   - Inserisci data (DD/MM/AAAA) : "); // aggiungere placeholder
-  scanf("%d/%d/%d", &giorno, &mese, &anno);
-  getchar();
-  newSeg->data = anno * 10000 + mese * 100 + giorno;
+  time_t t = time(NULL);
+  struct tm *tm_info = localtime(&t);
 
-  // momentaneo
+  int anno_t = tm_info->tm_year + 1900;
+  int mese_t = tm_info->tm_mon + 1;
+  int giorno_t = tm_info->tm_mday;
+
+  newSeg->data = (anno_t * 10000) + (mese_t * 100) + giorno_t;
   newSeg->urgenza = 3;
   newSeg->stato = 0;
 
-  printf(" #   - Nuova segnalazione creata con ID: %d", newSeg->id);
+  printf(" #   - Nuova segnalazione creata con ID: %d\n", newSeg->id);
+  printf(" #   - Data di registrazione automatica (Sistema): %02d/%02d/%04d\n", giorno_t, mese_t, anno_t);
   printf(" #   - Premi INVIO per tornare alla Dashboard: ");
-  getchar();
+  fflush(stdout);
+  getchar(); 
 
   getPosition(root, newSeg, catIdx);
   appendNewSeg(newSeg, "./components/database/database.bin");
+  
+  return;
+
+  input_error: {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+  }
+  
+  printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard principale...                    | # \n");
+  free(newSeg);
+  getchar();
 }
 
 // Rimuovi segnalazione
@@ -709,7 +700,7 @@ void init_removeSeg(Root r, int32_t idTarget) {
   }
 
   if (!curr) {
-    printf(" #   - Segnalazione %d non trovata.\n", idTarget);
+    printf(" # | Segnalazione %d non trovata.\n", idTarget);
     return;
   }
 
@@ -775,20 +766,18 @@ void init_removeSeg(Root r, int32_t idTarget) {
     r->stato->chiuso->totChiuse--;
 
   free(curr);
-  printf(" #   - Segnalazione %d rimossa con successo.\n", idTarget);
+  printf(" # | Segnalazione %d rimossa con successo.\n", idTarget);
 }
 
-// Salva le segnalazioni nel file binario
 void save_records(Root r) {
     FILE *f = fopen("./components/database/database.bin", "wb");
     if (!f) {
-        perror("Errore nell'apertura del database in scrittura");
+        perror(" # | Errore nell'apertura del database in scrittura \n");
         return;
     }
 
     s curr = r->data->head;
     while (curr) {
-      // Scrittura speculare e precisa nei tipi rispetto alle fread
       fwrite(&(curr->id), sizeof(int32_t), 1, f);
       fwrite(curr->nome_cittadino, sizeof(char), 64, f);
       fwrite(curr->categoria, sizeof(char), 64, f);
@@ -802,7 +791,6 @@ void save_records(Root r) {
     fclose(f);
 }
 
-// Ricerca della segnalazione
 void search_seg(Root r, const char *searchString) {
   if (!r || !searchString) return;
 
@@ -907,8 +895,8 @@ const char *getMaxCatName(Root root) {
   }
 }
 
-void modifySeg(Root root, int32_t currId, int newState) {
-  if (root == NULL || newState < 0 || newState > 2) return;
+int modifySeg(Root root, int32_t currId, int newState) {
+  if (root == NULL || newState < 0 || newState > 2) return -1;
 
   int prefisso = currId / 100000;
   int catIdx = getCategoryIndex(prefisso);
@@ -918,16 +906,22 @@ void modifySeg(Root root, int32_t currId, int newState) {
     curr = curr->nextId;
   }
 
-  if (curr == NULL || curr->stato == newState) return;
+  if (curr == NULL) return -1;
+  if (curr->stato == newState) return 0;
 
   int vecchioStato = curr->stato;
 
   s prevStato = NULL;
   s currStato = NULL;
 
-  if (vecchioStato == 0) currStato = root->stato->aperto->head;
-  else if (vecchioStato == 1) currStato = root->stato->risoluzione->head;
-  else currStato = root->stato->chiuso->head;
+  if (vecchioStato == 0) 
+    currStato = root->stato->aperto->head;
+
+  else if (vecchioStato == 1) 
+    currStato = root->stato->risoluzione->head;
+
+  else 
+    currStato = root->stato->chiuso->head;
 
   while (currStato != NULL && currStato != curr) {
     prevStato = currStato;
@@ -936,31 +930,48 @@ void modifySeg(Root root, int32_t currId, int newState) {
 
   if (currStato == curr) {
     if (prevStato == NULL) {
-      if (vecchioStato == 0) root->stato->aperto->head = curr->nextStato;
-      else if (vecchioStato == 1) root->stato->risoluzione->head = curr->nextStato;
-      else root->stato->chiuso->head = curr->nextStato;
+
+      if (vecchioStato == 0) 
+        root->stato->aperto->head = curr->nextStato;
+
+      else if (vecchioStato == 1) 
+        root->stato->risoluzione->head = curr->nextStato;
+
+      else 
+        root->stato->chiuso->head = curr->nextStato;
     } else {
+
       prevStato->nextStato = curr->nextStato;
     }
 
-    if (vecchioStato == 0) root->stato->aperto->totAperte--;
-    else if (vecchioStato == 1) root->stato->risoluzione->totRis--;
-    else root->stato->chiuso->totChiuse--;
+    if (vecchioStato == 0) 
+      root->stato->aperto->totAperte--;
+
+    else if (vecchioStato == 1) 
+      root->stato->risoluzione->totRis--;
+
+    else 
+      root->stato->chiuso->totChiuse--;
   }
 
   curr->stato = newState;
 
   if (newState == 0) {
+
     curr->nextStato = root->stato->aperto->head;
     root->stato->aperto->head = curr;
     root->stato->aperto->totAperte++;
   } else if (newState == 1) {
+
     curr->nextStato = root->stato->risoluzione->head;
     root->stato->risoluzione->head = curr;
     root->stato->risoluzione->totRis++;
   } else if (newState == 2) {
+
     curr->nextStato = root->stato->chiuso->head;
     root->stato->chiuso->head = curr;
     root->stato->chiuso->totChiuse++;
   }
+
+  return 1;
 }
