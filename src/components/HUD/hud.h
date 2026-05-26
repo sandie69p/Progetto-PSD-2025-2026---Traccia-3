@@ -104,6 +104,16 @@ void modifySegHud(Root root);
  * @param sistema Il sistema finale da serializzare, ripulire e spegnere.
  * @return void
  */
-void salvataggio(Root sistema);
+void salvataggio(Root);
+
+/**
+ * @brief Interfaccia testuale controllata per la lettura espansa della descrizione di un record.
+ * @pre root deve essere un puntatore valido alla struttura di controllo Root (non nullo e inizializzato).
+ * @post Rintraccia il nodo nel grafo ed emette il dettaglio informativo a video. Lo stato della RAM rimane invariato.
+ * @note La funzione garantisce l'assenza di accoppiamento forte non accedendo mai direttamente alla memoria fisica del nodo.
+ * @param root Il sistema di controllo principale su cui effettuare la ricerca e il rendering.
+ * @return void
+ */
+void showDescription(Root);
 
 #endif

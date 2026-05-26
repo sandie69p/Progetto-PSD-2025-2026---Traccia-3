@@ -55,8 +55,8 @@ int main(void) {
     int choise;
     printf(" #    - Scelta: ");
     if (scanf("%d", &choise) != 1) {
-        while(getchar() != '\n');
-        continue;
+      while(getchar() != '\n');
+      continue;
     }
 
     switch(choise) {
@@ -65,6 +65,7 @@ int main(void) {
       case 3: showSeg(sistema); break;
       case 4: init_search_seg(sistema); break;
       case 5: modifySegHud(sistema); break;
+      case 6: showDescription(sistema); break;
       case 0: salvataggio(sistema); break;
     }  
   }  
@@ -88,11 +89,11 @@ void init() {
 }
 
 void handle_signal(int signum) {
-    if (signum == SIGINT) {
-        printf("\n\n # [SICUREZZA] Intercettato Ctrl+C! Riasciugatura database e svuotamento RAM in corso...\n");
-        if (sistema != NULL) {
-            salvataggio(sistema); // Fa save_records() e deleteGraph() con l'animazione!
-        }
-        exit(0); // Esce in modo pulito restituendo 0 al sistema operativo
+  if (signum == SIGINT) {
+    printf("\n\n # [SICUREZZA] Intercettato Ctrl+C! Riasciugatura database e svuotamento RAM in corso...\n");
+    if (sistema != NULL) {
+      salvataggio(sistema);
     }
+    exit(0);
+  }
 }

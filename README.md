@@ -62,7 +62,7 @@ The project includes an automated test executable that validates the core ADT op
 
 The test suite was executed under Valgrind, reporting:
 
-```text
+```bash
 ==5726== HEAP SUMMARY:
 ==5726==     in use at exit: 0 bytes in 0 blocks
 ==5726==   total heap usage: 25,013 allocs, 25,013 frees, 30,206,376 bytes allocated

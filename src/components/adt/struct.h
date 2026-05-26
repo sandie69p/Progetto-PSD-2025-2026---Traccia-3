@@ -258,7 +258,7 @@ const char *getName(s);
  * @return Puntatore a stringa costante contenente la descrizione.
  * @return "Not found" se node e' NULL.
  */
-const char *getDesc(s);
+const char *getDescription(s);
 
 /**
  * @brief Restituisce il nome testuale della categoria.
@@ -483,5 +483,13 @@ void search_seg(Root, const char *);
  * @return 1 se la modifica viene completata con successo.
  */
 int modifySeg(Root, int32_t, int);
+
+/**
+ * @brief Rintraccia un nodo segnalazione all'interno del grafo partendo dal suo ID.
+ * @param Il puntatore alla struttura principale di controllo (radice).
+ * @param L'identificativo numerico a 7 cifre da ricercare.
+ * @return `s` Il puntatore al nodo opaco trovato, oppure NULL se il record non esiste.
+ */
+s findSegByID(Root, int32_t);
 
 #endif
