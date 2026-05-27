@@ -701,18 +701,22 @@ s nextForUrg(s node)          { return (node != NULL) ? node->nextUrg : NULL; }
  *
  * @return char* Il puntatore alla stringa formattata "GG/MM/AAAA", pronta per l'emissione a video 
  * tramite HUD, oppure NULL se il sotto-sistema di memoria Heap è esaurito.
- *
+ * @return NULL se node e' NULL oppure se l'allocazione della memoria fallisce.
+ * 
  * @warning Poiché la funzione esegue una malloc() esplicita ad ogni invocazione, il modulo ricevente 
  * ha la responsabilità di invocare la free() sul puntatore restituito per evitare memory leak.
  */
 char *getData(s node) {
+  if (node == NULL) return NULL;
+
   char *buffer = (char *) malloc(16 * sizeof(char));
+  if (buffer == NULL) return NULL;
 
   int data = getRawData(node);
 
-  int anno = (int) data / 10000;
-  int mese = ( data % 10000 ) / 100;
-  int giorno = data % 100;
+  int anno    = (int) data / 10000;
+  int mese    = (data % 10000) / 100;
+  int giorno  = data % 100;
 
   sprintf(buffer, "%02d/%02d/%04d", giorno, mese, anno);
 
@@ -1107,6 +1111,10 @@ void init_removeSeg(Root r, int32_t idTarget) {
 
   int prefisso = idTarget / 100000;
   int catIdx = getCategoryIndex(prefisso);
+  if (catIdx == -1) {
+    printf(" # | Segnalazione %d non trovata.\n", idTarget);
+    return;
+  }
 
   s curr = r->id->cat[catIdx];
   s prev = NULL;
@@ -1424,6 +1432,7 @@ int modifySeg(Root root, int32_t currId, int newState) {
 
   int prefisso = currId / 100000;
   int catIdx = getCategoryIndex(prefisso);
+  if (catIdx == -1) return -1;
 
   s curr = root->id->cat[catIdx];
   while (curr != NULL && curr->id != currId) {

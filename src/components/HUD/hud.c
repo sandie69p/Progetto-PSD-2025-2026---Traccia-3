@@ -67,7 +67,160 @@ static void intestation(void) {
  * @param[out] fReport File stream di output aperto verso la memoria secondaria in modalità di testo.
  *
  * @pre `sistema` deve essere un'istanza valida, non nulla e precedentemente inizializzata in memoria RAM.
- * @post Un file di testo formattato viene generato o sovrascritto nella cartella di esecuzione. 
+ * @post Un file di testo formattato viene generato o sovrascritto nella cartella dvoid modifySegHud(Root root) {
+  if (root == NULL) return;
+
+  system("clear");
+  
+  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+  printf(" # |------------------------------------- MODIFICA STATO SEGNALAZIONE -----------------------------------| # \n");
+  printf(" # |                                                                                                     | # \n");
+
+  int32_t idTarget;
+  char riga_prompt[128];
+  sprintf(riga_prompt, " Inserisci ID della segnalazione comunale (oppure premi 0 per annullare): ");
+  printf(" # |%-101s| # \n", riga_prompt);
+  printf(" # |                                                                                                     | # \n");
+  printf(" # | Scelta ID: ");
+  fflush(stdout);
+
+  if (scanf("%d", &idTarget) != 1) {
+    printf("\n # | [ERRORE RIGIDO] ID non conforme! Deve essere numerico.                                             | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                | # \n");
+    getchar();
+    return;
+  }
+
+  // VIA DI FUGA IMMEDIATA
+  if (idTarget == 0) {
+    printf("\n # | [INFO] Operazione annullata dall'utente. Ritorno alla dashboard...                                  | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    getchar();
+    return;
+  }
+
+  if (!((idTarget >= 1000000 && idTarget <= 1099999)||
+    (idTarget >= 1100000 && idTarget <= 1199999) ||
+    (idTarget >= 2000000 && idTarget <= 2099999) ||
+    (idTarget >= 2100000 && idTarget <= 2199999) ||
+    (idTarget >= 3000000 && idTarget <= 3099999) ||
+    (idTarget >= 4000000 && idTarget <= 4099999) ||
+    (idTarget >= 5000000 && idTarget <= 5099999) ||
+    (idTarget >= 6000000 && idTarget <= 6099999) ||
+    (idTarget >= 7000000 && idTarget <= 7099999) ||
+    (idTarget >= 8000000 && idTarget <= 8099999) ||
+    (idTarget >= 9000000 && idTarget <= 9099999))
+  ) {
+    printf("\n # | [ERRORE RIGIDO] ID fuori range! Deve essere compreso tra 1000000 e 9099999.                       | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                | # \n");
+    getchar();
+    return;
+  }
+
+  int residuo_id = getchar();
+  if (residuo_id != '\n' && residuo_id != EOF) {
+    printf("\n # | [ERRORE RIGIDO] Input non conforme! Rilevato testo alfabetico illegale accodato all'ID.           | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                | # \n");
+    getchar();
+    return;
+  }
+
+  // STAGE 2: SELEZIONE STATO CON INTERCETTAZIONE DEL TASTO ESC (ASCII 27) ALL'ISTANTE
+  system("clear");
+  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+  printf(" # |------------------------------------- SELEZIONE NUOVO STATO OPERATIVO -------------------------------| # \n");
+  
+  char riga_target[128];
+  sprintf(riga_target, " Modifica in corso per la segnalazione ID: %d", idTarget);
+  printf(" # |%-101s| # \n", riga_target);
+  printf(" # |                                                                                                     | # \n");
+  printf(" # | 0) APERTA                                                                                           | # \n");
+  printf(" # | 1) IN RISOLUZIONE                                                                                   | # \n");
+  printf(" # | 2) CHIUSA                                                                                           | # \n");
+  printf(" # |-----------------------------------------------------------------------------------------------------| # \n");
+  printf(" # | [Premi ESC in qualsiasi momento per annullare e fare il Rollback]                                   | # \n");
+  printf(" # | Inserisci codice stato (0-2): ");
+  fflush(stdout);
+
+  // Configuro il terminale in modalità grezza per catturare ESC all'istante come in ricerca
+  system("stty -icanon -echo");
+  int nuovoStato = -1;
+  int ch = getchar();
+
+  if (ch == 27) { // TASTO ESC INTERCETTATO
+    system("stty cooked echo"); // RIPRISTINO IMMEDIATO DELLA TTY
+    system("clear");
+    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+    printf(" # |------------------------------------- OPERAZIONE ANNULLATA -----------------------------------------| # \n");
+    printf(" # |                                                                                                     | # \n");
+    printf(" # | [ROLLBACK] Nessuna modifica effettuata. Il terminale e' stato ripristinato correttamente.           | # \n");
+    printf(" # |                                                                                                     | # \n");
+    printf(" # | Premi INVIO per tornare alla dashboard principale...                                                | # \n");
+    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    getchar();
+    return;
+  }
+
+  system("stty cooked echo"); // Ripristino per la verifica standard se non ha premuto ESC
+
+  // Convertiamo il carattere letto in numero (se è tra '0' e '2')
+  if (ch >= '0' && ch <= '2') {
+    nuovoStato = ch - '0';
+  } else {
+    printf("\n # | [ERRORE RIGIDO] Stato non valido! Scegliere unicamente 0, 1 o 2.                                    | # \n");
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                 | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    getchar();
+    return;
+  }
+
+  // SE IL CONTROLLO SUPERA LO SBARRAMENTO, ESEGUE LA TRANSAZIONE SULL'ADT OPACO
+  int esito_modifica = modifySeg(root, idTarget, nuovoStato);
+
+  system("clear");
+  printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+
+  if (esito_modifica == 1) {
+    printf(" # |--------------------------------- AGGIORNAMENTO COMPLETATO CON SUCCESSO -----------------------------| # \n");
+    printf(" # |                                                                                                     | # \n");
+    char riga_successo[128];
+    sprintf(riga_successo, " # | [ OK ] Stato della segnalazione %d modificato correttamente in RAM locale. ", idTarget);
+    printf(" # |%-101s| # \n", riga_successo);
+    printf(" # | I cambiamenti saranno resi persistenti sul file database binario solo alla chiusura (0).            | # \n");
+  } 
+  else if (esito_modifica == 0) {
+    printf(" # |------------------------------------- OPERAZIONE NON NECESSARIA -------------------------------------| # \n");
+    printf(" # |                                                                                                     | # \n");
+    char riga_warning[128];
+    sprintf(riga_warning, " # | [AVVISO] La segnalazione %d possiede gia' lo stato operativo selezionato.              | #", idTarget);
+    printf(" # |%-101s| # \n", riga_warning);
+    printf(" # | Nessuna operazione di riposizionamento eseguita sugli indici del grafo.                             | # \n");
+  } 
+  else {
+    printf(" # |----------------------------------------- OPERAZIONE FALLITA ----------------------------------------| # \n");
+    printf(" # |                                                                                                     | # \n");
+    char riga_errore[128];
+    sprintf(riga_errore, " # [ERRORE] Impossibile procedere. L'ID %d non e' presente nel database locale. ", idTarget);
+    printf(" # |%-101s| # \n", riga_errore);
+    printf(" # | Verificare la presenza dell'ID tramite il pannello delle statistiche generali.                      | # \n");
+  }
+
+  printf(" # |                                                                                                     | # \n");
+  printf(" # | Premi INVIO per confermare e tornare alla dashboard principale...                                   | # \n");
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF);
+  getchar();
+}i esecuzione. 
  * Lo stream verso il disco viene chiuso correttamente. Lo stato della memoria RAM rimane completamente inalterato.
  */
 static void getReport(Root sistema) {
@@ -432,7 +585,7 @@ void removeSeg(Root root) {
   printf(" # |                                                                                                     | # \n");
   
   char riga_prompt[128];
-  sprintf(riga_prompt, " Inserisci il codice numerico identificativo (ID) da eliminare permanentemente: ");
+  sprintf(riga_prompt, " Inserisci l'identificativo (ID) da eliminare permanentemente (oppure premi 0 per annullare): ");
   printf(" # |%-101s| # \n", riga_prompt);
   printf(" # |                                                                                                     | # \n");
   printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
@@ -446,6 +599,14 @@ void removeSeg(Root root) {
     while ((c = getchar()) != '\n' && c != EOF);
     printf(" # Premi INVIO per annullare e ritornare alla dashboard...                                               | # \n");
     printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+    getchar();
+    return;
+  }
+
+  if (idTarget == 0) {
+    printf("\n # | [INFO] Operazione annullata dall'utente. Ritorno alla dashboard...                                  | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
     getchar();
     return;
   }
@@ -614,13 +775,30 @@ void modifySegHud(Root root) {
 
   int32_t idTarget;
   char riga_prompt[128];
-  sprintf(riga_prompt, " Inserisci ID della segnalazione comunale: ");
+  sprintf(riga_prompt, " Inserisci ID della segnalazione comunale (oppure premi 0 per annullare): ");
   printf(" # |%-101s| # \n", riga_prompt);
   printf(" # |                                                                                                     | # \n");
   printf(" # | Scelta ID: ");
   fflush(stdout);
 
-  if (scanf("%d", &idTarget) != 1 || !((idTarget >= 1000000 && idTarget <= 1099999)||
+  if (scanf("%d", &idTarget) != 1) {
+    printf("\n # | [ERRORE RIGIDO] ID non conforme! Deve essere numerico.                                              | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                  | # \n");
+    getchar();
+    return;
+  }
+
+  if (idTarget == 0) {
+    printf("\n # | [INFO] Operazione annullata dall'utente. Ritorno alla dashboard...                                  | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    getchar();
+    return;
+  }
+
+  if (!((idTarget >= 1000000 && idTarget <= 1099999)||
     (idTarget >= 1100000 && idTarget <= 1199999) ||
     (idTarget >= 2000000 && idTarget <= 2099999) ||
     (idTarget >= 2100000 && idTarget <= 2199999) ||
@@ -630,22 +808,22 @@ void modifySegHud(Root root) {
     (idTarget >= 6000000 && idTarget <= 6099999) ||
     (idTarget >= 7000000 && idTarget <= 7099999) ||
     (idTarget >= 8000000 && idTarget <= 8099999) ||
-    (idTarget >= 9000000 && idTarget <= 9099999)) 
+    (idTarget >= 9000000 && idTarget <= 9099999))
   ) {
-    printf("\n # | [ERRORE RIGIDO] ID non conforme! Deve essere numerico e compreso tra 1000000 e 2199999.           | # \n");
+    printf("\n # | [ERRORE RIGIDO] ID fuori range! Deve essere compreso tra 1000000 e 9099999.                         | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                | # \n");
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                  | # \n");
     getchar();
     return;
   }
 
   int residuo_id = getchar();
   if (residuo_id != '\n' && residuo_id != EOF) {
-    printf("\n # | [ERRORE RIGIDO] Input non conforme! Rilevato testo alfabetico illegale accodato all'ID.           | # \n");
+    printf("\n # | [ERRORE RIGIDO] Input non conforme! Rilevato testo alfabetico illegale accodato all'ID.             | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                | # \n");
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                  | # \n");
     getchar();
     return;
   }
@@ -661,26 +839,40 @@ void modifySegHud(Root root) {
   printf(" # | 0) APERTA                                                                                           | # \n");
   printf(" # | 1) IN RISOLUZIONE                                                                                   | # \n");
   printf(" # | 2) CHIUSA                                                                                           | # \n");
-  printf(" # |                                                                                                     | # \n");
+  printf(" # |-----------------------------------------------------------------------------------------------------| # \n");
+  printf(" # | [Premi ESC in qualsiasi momento per annullare e fare il Rollback]                                   | # \n");
   printf(" # | Inserisci codice stato (0-2): ");
   fflush(stdout);
 
-  int nuovoStato;
-  if (scanf("%d", &nuovoStato) != 1 || nuovoStato < 0 || nuovoStato > 2) {
-    printf("\n # | [ERRORE RIGIDO] Stato non valido! Scegliere unicamente una delle opzioni censite (0, 1, 2).        | # \n");
+  system("stty -icanon -echo");
+  int nuovoStato = -1;
+  int ch = getchar();
+
+  if (ch == 27) {
+    system("stty cooked echo");
+    system("clear");
+    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
+    printf(" # |------------------------------------- OPERAZIONE ANNULLATA ------------------------------------------| # \n");
+    printf(" # |                                                                                                     | # \n");
+    printf(" # | [ROLLBACK] Nessuna modifica effettuata. Il terminale e' stato ripristinato correttamente.           | # \n");
+    printf(" # |                                                                                                     | # \n");
+    printf(" # | Premi INVIO per tornare alla dashboard principale...                                                | # \n");
+    printf(" ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                 | # \n");
     getchar();
     return;
   }
 
-  int residuo_stato = getchar();
-  if (residuo_stato != '\n' && residuo_stato != EOF) {
-    printf("\n # | [ERRORE RIGIDO] Scelta corrotta da caratteri alfabetici non consentiti!                             | # \n");
+  system("stty cooked echo");
+
+  if (ch >= '0' && ch <= '2') {
+    nuovoStato = ch - '0';
+  } else {
+    printf("\n # | [ERRORE RIGIDO] Stato non valido! Scegliere unicamente 0, 1 o 2.                                    | # \n");
+    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                  | # \n");
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
-    printf(" # | Premi INVIO per annullare l'operazione e tornare alla dashboard...                                  | # \n");
     getchar();
     return;
   }
@@ -694,7 +886,7 @@ void modifySegHud(Root root) {
     printf(" # |--------------------------------- AGGIORNAMENTO COMPLETATO CON SUCCESSO -----------------------------| # \n");
     printf(" # |                                                                                                     | # \n");
     char riga_successo[128];
-    sprintf(riga_successo, " # | [ OK ] Stato della segnalazione %d modificato correttamente in RAM locale. ", idTarget);
+    sprintf(riga_successo, " [ OK ] Stato della segnalazione %d modificato correttamente in RAM locale. ", idTarget);
     printf(" # |%-101s| # \n", riga_successo);
     printf(" # | I cambiamenti saranno resi persistenti sul file database binario solo alla chiusura (0).            | # \n");
   } 
@@ -702,7 +894,7 @@ void modifySegHud(Root root) {
     printf(" # |------------------------------------- OPERAZIONE NON NECESSARIA -------------------------------------| # \n");
     printf(" # |                                                                                                     | # \n");
     char riga_warning[128];
-    sprintf(riga_warning, " # | [AVVISO] La segnalazione %5d possiede gia' lo stato operativo selezionato.              | #", idTarget);
+    sprintf(riga_warning, " [AVVISO] La segnalazione %d possiede gia' lo stato operativo selezionato. ", idTarget);
     printf(" # |%-101s| # \n", riga_warning);
     printf(" # | Nessuna operazione di riposizionamento eseguita sugli indici del grafo.                             | # \n");
   } 
@@ -710,13 +902,15 @@ void modifySegHud(Root root) {
     printf(" # |----------------------------------------- OPERAZIONE FALLITA ----------------------------------------| # \n");
     printf(" # |                                                                                                     | # \n");
     char riga_errore[128];
-    sprintf(riga_errore, " # [ERRORE] Impossibile procedere. L'ID %d non e' presente nel database locale. ", idTarget);
+    sprintf(riga_errore, " [ERRORE] Impossibile procedere. L'ID %d non e' presente nel database locale. ", idTarget);
     printf(" # |%-101s| # \n", riga_errore);
     printf(" # | Verificare la presenza dell'ID tramite il pannello delle statistiche generali.                      | # \n");
   }
 
   printf(" # |                                                                                                     | # \n");
   printf(" # | Premi INVIO per confermare e tornare alla dashboard principale...                                   | # \n");
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF);
   getchar();
 }
 
@@ -772,6 +966,14 @@ void showDescription(Root root) {
     return;
   }
 
+  if (idTarget == 0) {
+    printf("\n # | [INFO] Operazione annullata dall'utente. Ritorno alla dashboard...                                  | # \n");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    getchar();
+    return;
+  }
+
   int residuo = getchar();
   if (residuo != '\n' && residuo != EOF) {
     printf("\n # | [ERRORE RIGIDO] Input corrotto! Rilevato testo alfabetico illegale accodato all'ID.                 | # \n");
@@ -792,7 +994,9 @@ void showDescription(Root root) {
     printf(" # | ID: %-94d | # \n", getID(curr));
     printf(" # | Categoria: %-88s | # \n", getCat(curr));
     printf(" # | Cittadino: %-88s | # \n", getName(curr));
-    printf(" # | Data: %-90s | # \n", getData(curr));
+    char *dataStr = getData(curr);
+    printf(" # | Data: %-90s | # \n", dataStr ? dataStr : "N/D");
+    free(dataStr);
     printf(" # |-----------------------------------------------------------------------------------------------------| # \n");
     printf(" # | DESCRIZIONE:                                                                                        | # \n");
     
@@ -806,7 +1010,6 @@ void showDescription(Root root) {
     sprintf(riga_errore, " [ERRORE] Impossibile procedere. L'ID %d non esiste nel database del comune. ", idTarget);
     printf(" # |%-101s| # \n", riga_errore);
     fflush(stdout);
-    getchar();
   }
 
   printf(" # |                                                                                                     | # \n");

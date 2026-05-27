@@ -1,9 +1,11 @@
 *.out
 *.o
 *.py
+*.tex
 
 src/municipal_system
 
 # Doxygen config locale
 docs/Doxyfile
 docs/doxygen/
+.vscode
