@@ -1,7 +1,6 @@
 *.out
 *.o
 *.py
-*.tex
 
 src/municipal_system
 

@@ -1443,7 +1443,7 @@ int modifySeg(Root root, int32_t currId, int newState) {
   if (curr->stato == newState) return 0;
 
   int vecchioStato = curr->stato;
-
+  
   s prevStato = NULL;
   s currStato = NULL;
 

@@ -1,0 +1,779 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{mdframed}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{float}
+
+\definecolor{primary}{HTML}{1A1A2E}
+\definecolor{accent}{HTML}{16213E}
+\definecolor{highlight}{HTML}{0F3460}
+\definecolor{codebg}{HTML}{F4F4F4}
+\definecolor{codeframe}{HTML}{CCCCCC}
+\definecolor{keywordcolor}{HTML}{0F3460}
+\definecolor{commentcolor}{HTML}{6A737D}
+\definecolor{stringcolor}{HTML}{032F62}
+\definecolor{boxbg}{HTML}{EEF2FF}
+\definecolor{boxframe}{HTML}{1A1A2E}
+
+\lstdefinestyle{cstyle}{
+    language=C,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    framerule=0.5pt,
+    rulecolor=\color{codeframe},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\bfseries\color{keywordcolor},
+    commentstyle=\itshape\color{commentcolor},
+    stringstyle=\color{stringcolor},
+    numberstyle=\tiny\color{gray},
+    numbers=left,
+    numbersep=8pt,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=2,
+    captionpos=b
+}
+\lstset{style=cstyle}
+
+\newmdenv[
+    backgroundcolor=boxbg,
+    linecolor=boxframe,
+    linewidth=1.5pt,
+    roundcorner=4pt,
+    innertopmargin=8pt,
+    innerbottommargin=8pt,
+    innerleftmargin=10pt,
+    innerrightmargin=10pt,
+    skipabove=6pt,
+    skipbelow=6pt
+]{specbox}
+
+\titleformat{\section}{\Large\bfseries\color{primary}}{\thesection.}{0.5em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{accent}}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{highlight}}{\thesubsubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+\titlespacing*{\subsubsection}{0pt}{8pt}{2pt}
+
+\setstretch{1.15}
+
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{gray}{Portale Urbanistico Comunale --- Relazione Integrale}}
+\fancyhead[R]{\small\textcolor{gray}{PSD 2025--2026}}
+\fancyfoot[C]{\small\textcolor{gray}{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=highlight,
+    urlcolor=highlight,
+    pdftitle={Relazione Progetto PSD - Salvatore Pisu},
+    pdfauthor={Salvatore Pisu}
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{1.5cm}
+    {\Huge\bfseries\color{primary} Portale Urbanistico Comunale} \\[0.5cm]
+    {\Large\color{accent} Architettura Multi-Indice a Grafo Ortogonale per la Gestione di Disservizi Territoriali} \\
+    \vspace{1.5cm}
+    \noindent\rule{\linewidth}{1.5pt} \\
+    \vspace{0.3cm}
+    {\large\bfseries Relazione Tecnica di Progettazione --- Corso di PSD 2025--2026} \\
+    {\large Sviluppo Autonomo Individuale --- Traccia 3} \\
+    \vspace{0.3cm}
+    \noindent\rule{\linewidth}{0.5pt} \\
+    \vspace{2cm}
+    \begin{tabular}{rl}
+        \textbf{Autore:}       & Salvatore Pisu (\texttt{sandie69p}) \\[4pt]
+        \textbf{Repository:}   & \href{https://github.com/sandie69p/Progetto-PSD-2025-2026---Traccia-3}{\texttt{github.com/sandie69p/Progetto-PSD-2025-2026---Traccia-3}} \\[4pt]
+        \textbf{Ambiente:}     & Linux TTY --- GCC \\[4pt]
+        \textbf{Standard:}     & C99 Compilato con GNU Make \\[4pt]
+        \textbf{Validazione:}  & Valgrind Memcheck \& GDB Subsystem \\
+    \end{tabular}
+    \vfill
+    {\small\color{gray} Dipartimento di Informatica --- Università degli Studi di Salerno}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Introduzione al progetto}
+
+\subsection{Approccio metodologico alla Traccia 3}
+L'approccio iniziale alla Traccia 3 (``Portale Urbanistico Comunale'') è stato guidato dalla volontà di elaborare una soluzione nativa, cruda e totalmente autocontenuta. Rifiutando l'impiego di database relazionali esterni, motori di persistenza di terze parti o astrazioni preconfezionate, ho scelto di operare direttamente a basso livello sulla memoria Heap del calcolatore in C99. L'obiettivo era creare un sistema transazionale in grado di catalogare migliaia di record senza alcun overhead grafico, massimizzando le prestazioni computazionali e l'efficienza nell'utilizzo dei registri della CPU.
+
+\subsection{Vincoli strutturali e limiti delle soluzioni lineari}
+La principale complessità della traccia risiedeva nell'obbligo di garantire l'interrogazione e la navigazione dei dati secondo quattro dimensioni logiche totalmente indipendenti e asincrone (ID categoria, data cronologica, stato operativo e livello di urgenza).
+
+Nei primi stadi di sviluppo, ho tentato di risolvere il problema utilizzando strutture dati lineari isolate. Ho provato ad implementare un array statico di record e, successivamente, una singola lista concatenata. Questo approccio ha evidenziato limiti strutturali invalidanti: ordinare la memoria per soddisfare una dimensione di consultazione (ad esempio, la cronologia) distruggeva istantaneamente l'ordinamento richiesto per le altre dimensioni. Per effettuare le ricerche incrementali e i filtri dinamici, il sistema si trovava costretto a eseguire continue scansioni sequenziali esaustive con complessità temporale pari a $\mathcal{O}(N)$. Questo generava colli di bottiglia prestazionali e un ammasso di codice ridondante e instabile.
+
+\subsection{Transizione al paradigma multi-indice}
+Preso atto dei limiti delle strutture lineari semplici, ho effettuato un refactoring radicale del paradigma logico. Ho compreso che il record (la segnalazione urbana) doveva esistere come entità fisica \textbf{unica in tutta la memoria Heap}, ma che le relazioni di attraversamento dovevano essere scorrelate dal dato stesso. Sono passato dal concetto di ``lista ordinata di elementi'' al concetto di \textbf{grafo multi-indice a puntatori ortogonali}. Separando la persistenza del record fisico dalla topologia dei vettori di navigazione, ho rimosso la necessità di duplicare la memoria, gettando le basi per un'architettura in cui l'accesso alle teste degli indici principali avviene in tempo costante $\mathcal{O}(1)$.
+
+\subsection{Consolidamento architetturale e risultato finale}
+Per consolidare questo nuovo modello, ho blindato l'intero nucleo algoritmico applicando in modo tassativo il principio dell'Information Hiding tramite \textit{opaque pointer}. Ho rimosso qualsiasi definizione di struttura dai file header, confinando i tipi fisici all'interno del file di implementazione dell'ADT. Ho scritto un motore di ordinamento ottimizzato basato su Quicksort applicato a vettori di puntatori temporanei per la ricostruzione iniziale degli indici e ho implementato sbarramenti difensivi per la cattura dell'input a basso livello da terminale (POSIX). Il risultato finale è un ecosistema software minimale e simmetrico, progettato per ridurre il rischio di corruzioni e memory leak, e verificato a tal fine con strumenti di analisi dinamica come Valgrind.
+
+\section{Motivazione della scelta dell'ADT}
+
+\subsection{Definizione dell'ADT adottato}
+L'Abstract Data Type sviluppato si configura come un \textbf{Grafo Multi-Indice Ordinato con Puntatori Ortogonali ed Incapsulamento Opaco}. La struttura di controllo centrale (\texttt{Root}) mantiene i descrittori e i puntatori di testa verso quattro assi di navigazione indipendenti, mentre i singoli nodi atomici contengono al proprio interno i campi dato e il set di puntatori necessari a innestarsi contemporaneamente in tutte le catene logiche.
+
+\subsection{Requisiti funzionali del dominio applicativo}
+Un portale urbanistico comunale orientato alla consultazione intensiva richiede che le operazioni di filtraggio statistico, la visualizzazione cronologica delle priorità e la ricerca live per ID avvengano con latenza minima. Se un operatore richiede la visualizzazione delle segnalazioni più urgenti, il sistema non deve scansionare l'intero database: accede direttamente alla testa del bucket di urgenza, già organizzato a tempo di inserimento. I requisiti del problema impongono quindi: zero ridondanza dei dati, persistenza immutabile dell'ID e multidimensionalità degli accessi.
+
+\subsection{Analisi comparativa delle strutture dati candidate}
+Per giungere alla scelta ottimale, ho analizzato e scartato sistematicamente le strutture dati classiche:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Array statico / dinamico:} Consentirebbe la ricerca binaria in $\mathcal{O}(\log N)$ per un singolo asse ordinato, ma gli inserimenti e le rimozioni richiederebbero lo shifting dei blocchi di memoria ($\mathcal{O}(N)$). Non supporta la navigazione multi-assiale simultanea senza duplicare l'intero array per quattro volte.
+    \item \textbf{Lista concatenata singola:} Garantisce l'allocazione dinamica, ma la ricerca e l'ordinamento degradano a $\mathcal{O}(N)$. Un solo puntatore \texttt{next} vincola il sistema a un unico percorso topologico piatto.
+    \item \textbf{Stack (Pila) / Queue (Coda) singola:} Strutture ad accesso restrittivo (LIFO/FIFO). Inutilizzabili per un sistema che richiede l'accesso casuale, la cancellazione puntuale di record intermedi e la ricerca live su stringa parziale.
+    \item \textbf{Alberi Binari di Ricerca (BST):} Un BST offrirebbe ricerche in $\mathcal{O}(\log N)$ nel caso medio, ma in assenza di bilanciamento nativo rischia di degenerare in una lista con complessità $\mathcal{O}(N)$. Gestire quattro alberi distinti avrebbe comportato la duplicazione dei nodi o un intreccio di puntatori padri/figli complesso e propenso a errori di segmentazione.
+    \item \textbf{Array di liste:} Utile per raggruppare i record per categoria, ma isola i dati impedendo una visione cronologica o di urgenza globale rapida senza algoritmi di fusione aggiuntivi.
+    \item \textbf{Hash Table:} Eccellente per la ricerca puntuale dell'ID in tempo medio $\mathcal{O}(1)$, ma inadatta quando viene richiesto l'attraversamento ordinato per data o la visualizzazione delle prime $N$ segnalazioni, poiché l'hashing distrugge nativamente qualsiasi relazione d'ordine tra le chiavi.
+\end{itemize}
+
+\subsection{Giustificazione della scelta ottimale}
+Nel contesto specifico della traccia, il grafo multi-indice a puntatori ortogonali risulta più adatto rispetto alle alternative analizzate. Mantenendo il record fisicamente unico in memoria Heap, azzera lo spreco di RAM. I quattro puntatori interni al nodo agiscono come ``binari'' indipendenti: l'accesso alle teste degli indici principali (stato, urgenza, categoria) avviene in tempo costante $\mathcal{O}(1)$, mentre la scansione parziale su una lista logica già filtrata riduce lo spazio di ricerca rispetto a una scansione globale. L'inserimento ordinato a caldo sconta un costo lineare sulla lista interessata, ma stabilizza l'intera infrastruttura garantendo letture e modifiche immediate, rispondendo ai vincoli ingegneristici del progetto.
+
+\section{Manuale d'uso e sistema di build}
+\label{sec:build}
+
+\subsection{Automazione del ciclo di build tramite GNU Make}
+\label{sec:makefile}
+L'automazione del ciclo di build, test e monitoraggio è interamente delegata a un \texttt{Makefile} rigido, configurato per imporre standard di compilazione severi ed evitare l'introduzione di warning o codice non conforme.
+
+\subsubsection{Target \texttt{clean}: sanificazione dell'albero dei sorgenti}
+Il comando \texttt{make clean} rimuove ricorsivamente la cartella degli oggetti intermedi (\texttt{src/components/object/*.o}), i binari generati del sistema principale e l'eseguibile della suite di test. Garantisce che ogni successiva compilazione avvenga partendo da uno stato pulito (Tabula Rasa), escludendo l'uso di vecchi file oggetto non aggiornati.
+
+\subsubsection{Target \texttt{all}: compilazione del binario principale}
+Il comando \texttt{make} (target di default \texttt{all}) avvia la compilazione dell'applicazione principale. Crea la directory degli oggetti, compila in modo indipendente \texttt{main.c}, \texttt{hud.c} e \texttt{struct.c} applicando i flag \texttt{-Wall -Wextra -std=c99 -O2 -g}, e infine esegue il linking dei file oggetto per produrre l'eseguibile finale \texttt{src/municipal\_system}.
+
+\subsubsection{Target \texttt{run}: esecuzione nativa dell'applicazione}
+Il comando \texttt{make run} richiama il target di compilazione per accertarsi che il binario sia aggiornato e successivamente esegue nativamente l'applicazione all'interno del terminale, agganciando automaticamente il database binario di produzione situato nel path corretto.
+
+\subsubsection{Target \texttt{debug}: analisi con GNU Debugger}
+Il comando \texttt{make debug} compila i sorgenti disabilitando le ottimizzazioni aggressive del compilatore che potrebbero mascherare lo stato dei registri (rimuove \texttt{-O2}) e invoca direttamente il debugger GNU (\texttt{gdb}) caricando il binario con i simboli di debug completi per l'analisi immediata dello stack dei record.
+
+\subsubsection{Target \texttt{valgrind}: analisi dinamica della memoria}
+Il comando \texttt{make valgrind} esegue il binario principale sotto la supervisione del tool di analisi dinamica Memcheck, configurato con i flag \texttt{--leak-check=full --show-leak-kinds=all --track-origins=yes} per intercettare l'utilizzo di variabili non inizializzate o mancate deallocazioni della memoria Heap.
+
+\subsubsection{Target \texttt{test}: esecuzione della suite di unit testing}
+Il comando \texttt{make test} compila l'infrastruttura di unit testing isolata scritta nel file \texttt{src/test/main.t.c}, effettuando il linking con l'oggetto dell'ADT \texttt{struct.o}. Subito dopo la compilazione, l'eseguibile di test viene lanciato automaticamente sotto Valgrind, validando la stabilità logica dell'ADT prima del deployment nell'HUD principale.
+
+\subsection{Funzionalità operative della dashboard}
+La dashboard dell'HUD modella un'interfaccia geometrica rigorosa a 101 caratteri di larghezza, incorniciata da caratteri speciali ANSI per l'allineamento visivo in TTY nativa.
+
+\subsubsection{Comando (1) --- Inserimento nuova segnalazione}
+Consente l'immissione di un nuovo record nel comune. L'operatore seleziona la macro-categoria; il sistema genera in automatico un ID a 7 cifre protetto da collisioni e acquisisce il timestamp orario. Un ciclo difensivo esegue lo \textit{Stream Masking} svuotando il buffer di input tramite \texttt{getchar()} per impedire che stringhe eccedenti i limiti della \texttt{struct} sporchino le successive acquisizioni. Il record viene iniettato in tutti e quattro gli indici del grafo.
+
+\subsubsection{Comando (2) --- Rimozione segnalazione per ID}
+Richiede l'ID numerico del disservizio da eliminare. Se l'utente digita \texttt{0}, scatta una via di fuga immediata. Qualora venga inserito un ID valido, la funzione scollega il nodo modificando i puntatori dei nodi adiacenti su tutti e quattro gli assi e libera fisicamente la memoria Heap tramite \texttt{free()}.
+
+\subsubsection{Comando (3) --- Visualizzazione prime 20 segnalazioni per data}
+Interroga l'indice cronologico globale partendo dal puntatore \texttt{dataNode} della Root. Sfruttando la pre-organizzazione del grafo, la funzione esegue un attraversamento lineare scorrendo il puntatore \texttt{nextData} per i primi 20 nodi, stampando a video una tabella geometrica pulita e simmetrica.
+
+\subsubsection{Comando (4) --- Ricerca live incrementale per ID o categoria}
+Rappresenta il modulo più avanzato dell'interfaccia uomo-macchina. Il terminale viene forzato in modalità non canonica (\texttt{stty -icanon -echo}). Il sistema cattura i singoli caratteri digitati senza attendere il tasto Invio. Ad ogni digitazione, pulisce lo schermo e filtra il grafo: se i primi caratteri corrispondono a un codice categoria valido, la ricerca si restringe al singolo bucket. Il tasto \texttt{ESC} interrompe la ricerca live e ripristina la modalità normale (\texttt{stty cooked echo}).
+
+\subsubsection{Comando (5) --- Modifica stato operativo di una segnalazione}
+Permette la transizione di stato di un record (Aperta $\rightarrow$ In Risoluzione $\rightarrow$ Chiusa). L'operatore immette l'ID e seleziona il nuovo codice stato. Se viene premuto \texttt{ESC}, la funzione intercetta il codice ASCII 27 ed esegue un \textit{rollback} totale lasciando inalterati puntatori e contatori di stato.
+
+\subsubsection{Comando (6) --- Visualizzazione descrizione estesa di un record}
+Dato che l'HUD non può accedere direttamente ai campi della struttura a causa dell'Information Hiding, questa opzione richiede l'ID, interroga la funzione estrattiva pubblica dell'ADT e stampa in un box geometrico dedicato il buffer testuale completo da 1024 byte della descrizione.
+
+\subsubsection{Comando (0) --- Salvataggio su disco, generazione report e uscita}
+Consolida lo stato del sistema: apre il file \texttt{database.bin} in modalità distruttiva (\texttt{"wb"}), scrive in modo sequenziale i record seguendo l'indice cronologico, genera un report statistico in formato testuale (\texttt{report\_comune.txt}), invoca la distruzione controllata del grafo azzerando la RAM e arresta il processo in modo deterministico.
+
+\newpage
+
+\section{Architettura dei moduli e organizzazione del repository}
+
+\subsection{Cartella radice del progetto}
+La cartella radice del progetto racchiude i file di configurazione, automazione e tracciamento del codice sorgente.
+
+\subsubsection{File \texttt{LICENSE}}
+Il file \texttt{LICENSE} contiene il testo integrale della licenza \textbf{GNU Affero General Public License versione 3 (AGPL-3.0)}. Questa scelta protegge il software garantendo che chiunque modifichi o utilizzi l'architettura sia obbligato a rilasciare il codice sorgente completo sotto la stessa licenza, preservando il valore dell'indipendenza e dell'open-source.
+
+\subsubsection{File \texttt{README.md}}
+Il file \texttt{README.md} descrive l'architettura generale del sistema, riporta le istruzioni rapide per la compilazione tramite Makefile, elenca i dettagli di implementazione del grafo multi-indice e riporta il log di Valgrind per certificare l'assenza di leak prima della sottomissione del progetto.
+
+\subsubsection{File \texttt{.gitignore}}
+Il file \texttt{.gitignore} impedisce il tracciamento su Git dei file binari generati, dei file oggetto intermedi (\texttt{.o}) prodotti dal compilatore e dei database locali temporanei utilizzati durante lo stress-testing, mantenendo pulita la repository ufficiale su GitHub.
+
+\subsubsection{Rimando al Makefile}
+La radice ospita inoltre il \texttt{Makefile} principale del progetto, strutturato per centralizzare la gestione dei path e delle dipendenze dei file. Per la descrizione estesa dei singoli target di compilazione e dei flag di ottimizzazione si rimanda alla Sezione~\ref{sec:makefile}.
+
+\subsection{Cartella \texttt{docs/}}
+La directory deputata alla documentazione e alle specifiche formali del sistema.
+
+\subsubsection{File \texttt{Doxyfile}}
+Il file \texttt{Doxyfile} contiene i parametri di configurazione per il tool \textbf{Doxygen}, strutturato per scansionare i tag speciali inseriti nei commenti dei sorgenti (\texttt{@brief}, \texttt{@param}, \texttt{@pre}, \texttt{@post}) e generare in automatico la documentazione HTML delle API pubbliche dell'ADT.
+
+\subsubsection{Documentazione in \LaTeX}
+Contiene i file sorgenti e gli stili tipografici necessari alla compilazione di questa stessa relazione tecnica, strutturata per formalizzare la semantica del software in modo rigoroso.
+
+\subsection{Cartella \texttt{src/}}
+Il cuore logico dell'applicazione, suddiviso nei file di bootstrap, reportistica e testing.
+
+\subsubsection{File \texttt{main.c}}
+Rappresenta l'entry point del programma. Inizializza il gestore asincrono dei segnali, invoca il bootstrap della radice richiamando \texttt{init\_root()} e lancia il ciclo infinito (\texttt{while(1)}) che coordina il flusso alternato tra il rendering della dashboard e la cattura selettiva dei comandi dell'operatore.
+
+\subsubsection{File \texttt{report\_comune.txt}}
+È il file di report statistico generato automaticamente ad ogni chiusura pulita del programma (opzione 0). Esporta su disco il volume totale delle segnalazioni attive, la ripartizione per stato e livello di urgenza e indica l'area urbana che registra il maggior tasso di criticità.
+
+\subsubsection{Cartella \texttt{test/} e file \texttt{main.t.c}}
+\label{sec:testdir}
+Directory isolata che ospita la suite di test atomica \texttt{main.t.c}. Questo file implementa una serie di test automatizzati indipendenti dall'HUD, scritti per verificare la correttezza logica delle funzioni primitive dell'ADT mediante asserzioni strutturali.
+
+\subsection{Cartella \texttt{components/}}
+La sottocartella architetturale in cui risiedono i moduli strutturali e i file di persistenza.
+
+\subsubsection{File \texttt{adt/struct.c}}
+È il file di implementazione dell'Abstract Data Type. Contiene le definizioni fisiche segrete delle strutture \texttt{struct segnalazione} e \texttt{struct root}, i meccanismi di allocazione dinamica, gli algoritmi di partizionamento Quicksort per il riallineamento dei vettori ortogonali e le routine di lettura/scrittura dei blocchi binari.
+
+\subsubsection{File \texttt{adt/struct.h}}
+L'interfaccia pubblica dell'ADT. Esporta unicamente i tipi opachi e i prototipi delle funzioni di consultazione e mutazione. Non rivela alcun dettaglio sui campi interni o sui puntatori del grafo, garantendo il completo disaccoppiamento del codice (Information Hiding).
+
+\subsubsection{File \texttt{HUD/hud.c}}
+Il Presentation Layer dell'applicazione. Implementa le funzioni di rendering tabellare, gestisce i banner simmetrici a 101 caratteri e converte l'input dell'utente in chiamate transazionali verso l'ADT.
+
+\subsubsection{File \texttt{HUD/hud.h}}
+L'header che espone le funzioni grafiche dell'interfaccia testuale. Permette al \texttt{main.c} di invocare la dashboard e le schermate di acquisizione dati senza che il bootstrap conosca le routine di manipolazione del terminale.
+
+\subsubsection{File \texttt{database/database.bin}}
+Il file di persistenza su disco. Memorizza le segnalazioni sotto forma di record binari a dimensione fissa (struttura serializzata da 1168 byte per blocco), consentendo il caricamento e il salvataggio tramite operazioni di blocco I/O sequenziali.
+
+\section{Strategia di eliminazione dei memory leak}
+
+\subsection{Analisi dinamica con Valgrind Memcheck}
+La natura multidimensionale del grafo ortogonale --- in cui uno stesso blocco di memoria Heap è agganciato contemporaneamente da quattro puntatori diversi --- ha reso la gestione della deallocazione una sfida ingegneristica complessa. Durante le prime build del progetto, liberare la memoria causava crash o lasciava blocchi orfani nell'Heap.
+
+\subsubsection{Risoluzione dei difetti rilevati}
+Attraverso un processo di debugging ricorsivo guidato dai log di Valgrind, ho analizzato ogni singola segnalazione di errore:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Invalid Read / Write of size X:} Identificava tentativi dell'HUD di accedere a nodi già deallocati da una precedente rimozione. Ho risolto introducendo sbarramenti rigidi con controllo di uguaglianza a \texttt{NULL} e forzando l'aggiornamento immediato di tutti e quattro i puntatori adiacenti durante lo sfilamento del nodo.
+    \item \textbf{Double Free Error:} Valgrind evidenziava che scorrere le liste in modo casuale portava a liberare lo stesso nodo più volte. Per sanare questo bug strutturale, ho progettato la funzione \texttt{deleteGraph} affinché effettui la demolizione controllata scorrendo \textbf{esclusivamente l'asse cronologico} (\texttt{nextData}). Dato che ogni record compare una e una sola volta nella catena cronologica globale, la funzione libera il nodo in sicurezza e azzera i puntatori dei descrittori di testa della Root, garantendo la pulizia totale.
+\end{itemize}
+
+\subsubsection{\texttt{calloc} vs \texttt{malloc}: motivazione della scelta}
+Nelle prime fasi di sviluppo, l'utilizzo della classica \texttt{malloc} per l'allocazione delle strutture di controllo (\texttt{Root}) e dei descrittori dei bucket introduceva errori intermittenti di lettura estranea. Valgrind segnalava costantemente il flag \texttt{"Conditional jump or move depends on uninitialised value(s)"}.
+
+Questo accadeva perché la \texttt{malloc} alloca la memoria senza pulirla, lasciando nei puntatori \texttt{next} residui di bit casuali presenti nell'Heap della macchina. Quando il sistema tentava di navigare il grafo, scambiava quella ``spazzatura'' per indirizzi di memoria validi, causando violazioni di accesso. Ho sostituito le allocazioni critiche introducendo la \texttt{calloc}, che non solo riserva lo spazio necessario ma azzera bit a bit l'intero blocco allocato, garantendo che ogni puntatore non ancora esplicitamente assegnato nasca nativamente impostato a \texttt{NULL}. Questo sbarramento preventivo ha azzerato i jump condizionali errati e ha stabilizzato l'architettura.
+
+\newpage
+
+\subsection{Debugging a runtime con GNU Debugger}
+Nei casi in cui il programma andava incontro a blocchi improvvisi o anomalie logiche durante la manipolazione in tempo reale dei descrittori, ho utilizzato il debugger GNU (\texttt{gdb}). Impostando i breakpoint all'interno di \texttt{modifySeg} e ispezionando lo stato dei registri tramite il comando \texttt{print root->stato->aperto->head}, sono riuscito a mappare visivamente lo sfilamento dei nodi dalle catene ortonormali, correggendo gli algoritmi di inserimento in testa e assicurando la coerenza dei flussi di memoria.
+
+\section{Specifica sintattica e semantica}
+
+Le specifiche formalizzano il comportamento di ciascun modulo eliminando qualsiasi ambiguità implementativa. Vengono elencate tutte le funzioni presenti nei file sorgente, distinguendo le funzioni pubbliche esportate dall'interfaccia da quelle interne statiche, che rimangono confinate al solo modulo di implementazione.
+
+\subsection{Specifica sintattica di hud.c}
+
+Le funzioni \textbf{pubbliche} esportate da \texttt{hud.h} sono:
+\begin{lstlisting}[style=cstyle, numbers=none]
+void dashboard(Root sistema);
+void insertNewSeg(Root root);
+void removeSeg(Root root);
+void showSeg(Root root);
+void init_search_seg(Root root);
+void modifySegHud(Root root);
+void showDescription(Root root);
+void salvataggio(Root sistema);
+\end{lstlisting}
+
+Le funzioni \textbf{interne statiche} (confinate in \texttt{hud.c}) sono:
+\begin{lstlisting}[style=cstyle, numbers=none]
+static void intestation(void);
+static void getReport(Root sistema);
+static void getSeg(s node);
+\end{lstlisting}
+
+\subsection{Specifica semantica di hud.c}
+
+\subsubsection{\texttt{dashboard}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{sistema} deve essere un puntatore valido a una struttura Root inizializzata (non nullo). \\
+\textbf{Post-condizioni:} Il terminale viene ripulito e il pannello di controllo viene renderizzato sullo standard output. Lo stato della RAM e del grafo rimane invariato. \\
+\textbf{Effetti collaterali:} Emette i flussi di testo formattati a 101 caratteri su \texttt{stdout}, inviando esplicitamente il flush allo stream.
+\end{specbox}
+
+\subsubsection{\texttt{insertNewSeg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido e non nullo. \\
+\textbf{Post-condizioni:} Il terminale viene ripulito e la cornice dell'HUD viene renderizzata. Il controllo dei puntatori viene trasferito alla routine di acquisizione \texttt{getNewSeg()}. Lo stato della RAM viene modificato solo in base all'esito della funzione delegata. \\
+\textbf{Effetti collaterali:} Delega l'intera logica di inserimento, allocazione e persistenza a \texttt{getNewSeg()}.
+\end{specbox}
+
+\subsubsection{\texttt{removeSeg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido e non nullo. \\
+\textbf{Post-condizioni:} Se l'ID è conforme e presente nel database, il nodo viene rimosso fisicamente dai quattro indici paralleli e la memoria viene deallocata; in caso contrario, la RAM non subisce alterazioni. Il terminale viene aggiornato graficamente prima del rientro alla dashboard. \\
+\textbf{Effetti collaterali:} Validazione multi-stadio dell'input tramite \textit{Stream Masking}. Confronto transazionale della cardinalità del grafo prima e dopo la rimozione per confermare l'esito senza violare l'Information Hiding.
+\end{specbox}
+
+\subsubsection{\texttt{showSeg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido, non nullo e precedentemente popolato. \\
+\textbf{Post-condizioni:} I primi 20 record dell'indice cronologico vengono impaginati nella griglia geometrica ed emessi su standard output. Lo stato della memoria RAM e la disposizione dei collegamenti ortogonali rimangono inalterati. \\
+\textbf{Effetti collaterali:} Blocca temporaneamente l'esecuzione tramite \texttt{getchar()} in attesa del comando utente.
+\end{specbox}
+
+\subsubsection{\texttt{init\_search\_seg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido e popolato. \\
+\textbf{Post-condizioni:} Al termine della routine, il terminale viene ripristinato nello stato originario. Il grafo non subisce modifiche. \\
+\textbf{Effetti collaterali:} Altera temporaneamente i flag della TTY POSIX tramite \texttt{system("stty -icanon -echo")} per intercettare i singoli caratteri in tempo reale. Ripristina la modalità canonica prima del rientro.
+\end{specbox}
+
+\subsubsection{\texttt{modifySegHud}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido e non nullo. \\
+\textbf{Post-condizioni:} Se l'utente preme \texttt{ESC} (codice 27), interrompe la funzione eseguendo un rollback immediato senza mutare la memoria. Se l'input è valido, delega la transizione all'ADT tramite \texttt{modifySeg()}. Il terminale viene ripristinato prima del rientro. \\
+\textbf{Effetti collaterali:} Modifica temporanea dei flag del terminale; emissione di alert grafici a schermo in base al codice di ritorno di \texttt{modifySeg()} ($-1$, $0$, $1$).
+\end{specbox}
+
+\subsubsection{\texttt{showDescription}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido e non nullo. \\
+\textbf{Post-condizioni:} Rintraccia il nodo nel grafo tramite \texttt{findSegByID()} ed emette il dettaglio informativo a video. Lo stato della RAM rimane invariato. \\
+\textbf{Effetti collaterali:} Invoca \texttt{getData()} e libera il buffer restituito tramite \texttt{free()} prima dell'uscita, garantendo l'assenza di memory leak.
+\end{specbox}
+
+\subsubsection{\texttt{salvataggio}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{sistema} valido e non nullo. \\
+\textbf{Post-condizioni:} I dati attuali della RAM vengono interamente persistiti su disco tramite \texttt{save\_records()}. Il report statistico viene aggiornato tramite \texttt{getReport()}. Tutta la memoria dinamica dell'Heap viene deallocata tramite \texttt{deleteGraph()}. \\
+\textbf{Effetti collaterali:} Questa funzione interrompe il processo invocando \texttt{exit(0)} e non ritorna mai al chiamante. Visualizza una barra di caricamento animata tramite \texttt{usleep()}.
+\end{specbox}
+
+\subsubsection{\texttt{intestation} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} Il terminale deve supportare la codifica ASCII standard. \\
+\textbf{Post-condizioni:} I delimitatori geometrici e i titoli delle colonne della griglia tabellare vengono emessi su \texttt{stdout}. Nessuna allocazione di memoria dinamica viene effettuata. \\
+\textbf{Effetti collaterali:} Scrittura su standard output.
+\end{specbox}
+
+\subsubsection{\texttt{getReport} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{sistema} valido e non nullo. \\
+\textbf{Post-condizioni:} Un file di testo formattato viene generato o sovrascritto nella cartella \texttt{src/} con il nome \texttt{report\_comune.txt}. Lo stato della memoria RAM rimane completamente inalterato. \\
+\textbf{Effetti collaterali:} Apertura e scrittura su file stream in modalità \texttt{"w"} (distruttiva). Il file stream viene correttamente chiuso prima dell'uscita. Interroga l'ADT esclusivamente tramite i getter pubblici, rispettando l'Information Hiding.
+\end{specbox}
+
+\subsubsection{\texttt{getSeg} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{node} valido, non nullo e correttamente allocato nel grafo. \\
+\textbf{Post-condizioni:} I dati del record vengono formattati in una stringa monospazio ed emessi su standard output. Il buffer temporaneo della data allocato sullo Heap viene interamente deallocato tramite \texttt{free()}. \\
+\textbf{Effetti collaterali:} Invoca \texttt{getData()} che esegue un'allocazione dinamica; acquisisce la titolarità del puntatore ed esegue la \texttt{free()} prima dell'uscita.
+\end{specbox}
+
+\subsection{Specifica sintattica di struct.c}
+
+Le funzioni \textbf{pubbliche} esportate da \texttt{struct.h} sono:
+\begin{lstlisting}[style=cstyle, numbers=none]
+Root         init_root(void);
+void         init_loadingDb(Root r, const char *fileName);
+void         init_sorting(Root r);
+void         init_removeSeg(Root r, int32_t idTarget);
+int          getTotalSeg(Root root);
+int          getTotalAperte(Root root);
+int          getTotalRis(Root root);
+int          getTotalChiuse(Root root);
+int          getMostUrgenti(Root root);
+s            getDataHead(Root root);
+int          getSegCountByCategory(Root root, int catIdx);
+int          getMaxCat(Root root);
+const char  *getMaxCatName(Root root);
+int32_t      getID(s node);
+const char  *getName(s node);
+const char  *getDescription(s node);
+const char  *getCat(s node);
+int          getRawData(s node);
+int          getUrg(s node);
+int          getState(s node);
+char        *getData(s node);
+s            nextForID(s node);
+s            nextForData(s node);
+s            nextForUrg(s node);
+void         getNewSeg(Root root);
+void         save_records(Root r);
+void         deleteGraph(Root root);
+void         search_seg(Root r, const char *searchString);
+int          modifySeg(Root root, int32_t currId, int newState);
+s            findSegByID(Root root, int32_t idTarget);
+\end{lstlisting}
+
+\newpage
+
+Le funzioni \textbf{interne} (non esportate, confinate in \texttt{struct.c}) sono:
+\begin{lstlisting}[style=cstyle, numbers=none]
+static int    getCategoryIndex(int prefisso);
+static bool   insertOnGraph(Root r, s newSeg);
+void          quicksort(s *arr, int low, int high, int type);
+int32_t       getRandomId(Root root, int prefix, int catIdx);
+void          getPosition(Root root, s newSeg, int catIdx);
+void          appendNewSeg(s newSeg, const char *fileName);
+\end{lstlisting}
+
+\subsection{Specifica semantica di struct.c}
+
+\subsubsection{\texttt{init\_root}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} Nessuna. \\
+\textbf{Post-condizioni:} Alloca la struttura principale Root e l'intera matrice dei descrittori di primo e secondo livello. Tutti i puntatori interni e i contatori vengono azzerati bit a bit tramite \texttt{calloc()}. \\
+\textbf{Return:} Puntatore \texttt{Root} valido su Heap; \texttt{NULL} se l'allocazione fallisce. \\
+\textbf{Effetti collaterali:} Riserva spazio di memoria dinamica sulla Heap.
+\end{specbox}
+
+\subsubsection{\texttt{init\_loadingDb}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{r} valido e non nullo; \texttt{fileName} stringa non nulla che identifica un file binario esistente e accessibile in lettura. \\
+\textbf{Post-condizioni:} Il grafo multi-indice viene espanso incorporando esclusivamente i record binari validi e integri. Il file stream viene correttamente chiuso. In caso di record parziale (lettura incompleta), il nodo parziale viene deallocato tramite \texttt{free()} prima di interrompere il ciclo. \\
+\textbf{Effetti collaterali:} Apertura di un file stream in modalità \texttt{"rb"}; allocazioni dinamiche tramite \texttt{calloc()} per ciascun nodo valido; incremento dei contatori interni.
+\end{specbox}
+
+\subsubsection{\texttt{init\_sorting}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{r} valido, non nullo e contenente un volume di record coerente con \texttt{totSegnalazioni}. \\
+\textbf{Post-condizioni:} L'intera struttura viene temporaneamente linearizzata in un vettore di supporto. I quattro indici ortogonali della RAM vengono rigenerati: l'indice cronologico risulta ordinato per data crescente; i bucket delle categorie, dello stato e dell'urgenza vengono ricatenati in ordine crescente. Il vettore di supporto viene deallocato tramite \texttt{free()} prima dell'uscita. \\
+\textbf{Effetti collaterali:} Allocazione temporanea di un array di puntatori; chiamate ricorsive a \texttt{quicksort()}; azzeramento e ricostruzione delle teste di tutti i descrittori.
+\end{specbox}
+
+\subsubsection{\texttt{init\_removeSeg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{r} valido; \texttt{idTarget} intero il cui prefisso sia mappabile da \texttt{getCategoryIndex()}. \\
+\textbf{Post-condizioni:} Se la segnalazione viene individuata, viene scollegata dai quattro assi del grafo, i contatori globali e parziali vengono decrementati e la memoria Heap del nodo viene liberata. Se il record non viene trovato, lo stato del sistema resta invariato e viene emesso un messaggio a video. \\
+\textbf{Effetti collaterali:} Scansioni lineari isolate su ciascuna catena (\texttt{nextId}, \texttt{nextData}, \texttt{nextUrg}, \texttt{nextStato}) per rintracciare il predecessore e bypassare i puntatori del target.
+\end{specbox}
+
+\subsubsection{Getter globali: \texttt{getTotalSeg}, \texttt{getTotalAperte}, \texttt{getTotalRis}, \texttt{getTotalChiuse}, \texttt{getMostUrgenti}, \texttt{getDataHead}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} deve essere un'istanza valida allocata tramite \texttt{init\_root()}. \\
+\textbf{Post-condizioni:} Lo stato della memoria RAM non subisce alcuna alterazione. \\
+\textbf{Return:} Tutti restituiscono il valore del contatore pre-calcolato corrispondente accedendovi in tempo costante $\mathcal{O}(1)$, oppure 0/\texttt{NULL} se \texttt{root} è nullo. \\
+\textbf{Effetti collaterali:} Nessuno.
+\end{specbox}
+
+\subsubsection{\texttt{getSegCountByCategory}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido; \texttt{catIdx} $\in [0, \texttt{allCat}-1]$. \\
+\textbf{Post-condizioni:} Lo stato del grafo e dei contatori non subisce alcuna alterazione. \\
+\textbf{Return:} Numero esatto di segnalazioni registrate nella categoria indicata, acceduto in $\mathcal{O}(1)$ tramite il vettore \texttt{nCat}; 0 se la radice è nulla o l'indice è fuori range. \\
+\textbf{Effetti collaterali:} Nessuno.
+\end{specbox}
+
+\subsubsection{\texttt{getMaxCat}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido e non nullo. \\
+\textbf{Post-condizioni:} Lo stato del grafo e dei vettori dei contatori non subisce alterazioni. \\
+\textbf{Return:} Indice intero (0--10) della categoria più colpita dai disservizi, trovato in $\mathcal{O}(\texttt{allCat})$ scorrendo il vettore \texttt{nCat}; $-1$ se il sistema è vuoto. \\
+\textbf{Effetti collaterali:} Nessuno.
+\end{specbox}
+
+\newpage
+
+\subsubsection{\texttt{getMaxCatName}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido e non nullo. \\
+\textbf{Post-condizioni:} Lo stato del grafo in memoria RAM rimane invariato. \\
+\textbf{Return:} Puntatore a stringa costante contenente il nome della categoria dominante; \texttt{"N/D"} se il sistema è vuoto o l'indice non è valido. La stringa risiede nel segmento dati del programma: nessuna allocazione dinamica. \\
+\textbf{Effetti collaterali:} Nessuno.
+\end{specbox}
+
+\subsubsection{Getter atomici: \texttt{getID}, \texttt{getName}, \texttt{getDescription}, \texttt{getCat}, \texttt{getRawData}, \texttt{getUrg}, \texttt{getState}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{node} deve essere un record valido. \\
+\textbf{Post-condizioni:} Lo stato interno del nodo non subisce alcuna alterazione. \\
+\textbf{Return:} Ogni funzione restituisce il campo corrispondente del nodo in $\mathcal{O}(1)$, oppure un valore di guardia (0, \texttt{"Not Found"}, \texttt{NULL}) se \texttt{node} è nullo. \\
+\textbf{Effetti collaterali:} Nessuno. Nessuna allocazione di memoria dinamica.
+\end{specbox}
+
+\subsubsection{\texttt{getData}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{node} puntatore a un record valido. \\
+\textbf{Post-condizioni:} Estrae il timestamp intero (AAAAMMGG) e lo formatta nella stringa \texttt{"GG/MM/AAAA"}. Il nodo interno non subisce alterazioni. \\
+\textbf{Return:} Stringa allocata dinamicamente di 16 byte; \texttt{NULL} se \texttt{node} è nullo o se l'allocazione fallisce. \\
+\textbf{Effetti collaterali:} \textbf{Allocazione di memoria Heap tramite \texttt{malloc()}.} Il modulo chiamante acquisisce la responsabilità di invocare la \texttt{free()} sul puntatore restituito per evitare memory leak.
+\end{specbox}
+
+\subsubsection{Iteratori: \texttt{nextForID}, \texttt{nextForData}, \texttt{nextForUrg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{node} deve essere inserito coerentemente nel grafo multi-indice. \\
+\textbf{Post-condizioni:} Lo stato del nodo e del grafo rimane invariato. \\
+\textbf{Return:} Puntatore al nodo logicamente successivo nel rispettivo asse ortogonale (\texttt{nextId}, \texttt{nextData}, \texttt{nextUrg}), acceduto in $\mathcal{O}(1)$; \texttt{NULL} se la catena è terminata o se \texttt{node} è nullo. \\
+\textbf{Effetti collaterali:} Nessuno.
+\end{specbox}
+
+\subsubsection{\texttt{getNewSeg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido e non nullo. \\
+\textbf{Post-condizioni:} In caso di successo, un nuovo record univoco viene inserito nel grafo e serializzato in modalità append su disco tramite \texttt{appendNewSeg()}; tutti i contatori di sistema vengono incrementati e il grafo viene riordinato tramite \texttt{init\_sorting()}. In caso di input non valido, il nodo parzialmente allocato viene liberato tramite \texttt{free()} e lo stato del grafo rimane invariato. \\
+\textbf{Effetti collaterali:} Interazione con \texttt{stdin} per l'acquisizione interattiva dei dati. Generazione automatica di ID univoco tramite \texttt{getRandomId()}, data tramite le primitive POSIX \texttt{time()} e \texttt{localtime()}. Scrittura su file binario in modalità append.
+\end{specbox}
+
+\subsubsection{\texttt{save\_records}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{r} valido, non nullo e coerentemente popolato. \\
+\textbf{Post-condizioni:} Il file \texttt{database.bin} viene interamente sovrascritto con i dati aggiornati del grafo, scorrendo l'asse cronologico per preservare l'ordine nativo. Lo stato dei nodi in memoria Heap rimane inalterato. \\
+\textbf{Effetti collaterali:} Apertura del file in modalità \texttt{"wb"} (distruttiva); scrittura sequenziale dei campi fissi di ciascun nodo; chiusura del file stream prima dell'uscita.
+\end{specbox}
+
+\subsubsection{\texttt{deleteGraph}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} puntatore valido (gestisce anche il caso di radice nulla o parzialmente allocata). \\
+\textbf{Post-condizioni:} Tutta la memoria Heap allocata per i nodi segnalazione e per le strutture di controllo viene liberata. Nessun blocco rimane orfano. \\
+\textbf{Effetti collaterali:} Deallocazione dell'intero Heap tramite scorrimento esclusivo dell'asse cronologico (\texttt{nextData}), seguito dalla liberazione in sequenza di tutti i descrittori di primo e secondo livello. Il puntatore del chiamante diventa invalido (\textit{Dangling Pointer}).
+\end{specbox}
+
+\subsubsection{\texttt{search\_seg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{r} valido; \texttt{searchString} non nulla. \\
+\textbf{Post-condizioni:} Lo stato del grafo in memoria RAM non subisce alcuna alterazione. I record individuati vengono formattati e stampati su standard output; le righe vuote residue vengono riempite geometricamente per preservare l'allineamento dell'HUD. \\
+\textbf{Effetti collaterali:} Partizione adattiva del canale di navigazione: se il prefisso corrisponde a una categoria valida, la scansione è limitata al bucket (\texttt{nextId}); altrimenti avviene sull'intero indice cronologico (\texttt{nextData}).
+\end{specbox}
+
+\subsubsection{\texttt{modifySeg}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} non nullo; \texttt{newState} $\in [0, 2]$. \\
+\textbf{Post-condizioni:} Se l'ID esiste e lo stato è differente, il nodo viene scollegato dalla vecchia sotto-lista di stato (splicing lineare sul canale \texttt{nextStato}) e inserito in testa alla nuova, aggiornando i contatori atomici. Se l'ID non esiste o lo stato è già quello richiesto, la RAM resta invariata. \\
+\textbf{Return:} \texttt{1} transazione completata; \texttt{0} stato già conforme; \texttt{-1} ID non presente o parametri fuori range. \\
+\textbf{Effetti collaterali:} Modifica dei puntatori interni \texttt{nextStato} del nodo bersaglio e dei nodi adiacenti; aggiornamento dei contatori di stato.
+\end{specbox}
+
+\subsubsection{\texttt{findSegByID}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{r} valido; \texttt{idTarget} intero a 32 bit il cui prefisso sia mappabile da \texttt{getCategoryIndex()}. \\
+\textbf{Post-condizioni:} Lo stato del grafo rimane invariato. \\
+\textbf{Return:} Puntatore opaco al nodo trovato; \texttt{NULL} se l'ID non esiste o la radice è nulla. \\
+\textbf{Effetti collaterali:} Scansione lineare sul canale \texttt{nextId} del bucket della categoria corrispondente.
+\end{specbox}
+
+\subsubsection{\texttt{getCategoryIndex} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{prefisso} intero estratto come le prime due cifre dell'ID. \\
+\textbf{Post-condizioni:} Lo stato del sistema rimane invariato. \\
+\textbf{Return:} Indice intero (0--10) corrispondente alla cella del vettore della categoria; $-1$ se il prefisso non appartiene a nessuna classe censita. \\
+\textbf{Effetti collaterali:} Nessuno.
+\end{specbox}
+
+\subsubsection{\texttt{insertOnGraph} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{r} e \texttt{newSeg} non nulli; \texttt{newSeg} completamente valorizzato. \\
+\textbf{Post-condizioni:} Il nodo viene agganciato in testa in $\mathcal{O}(1)$ alle quattro liste dei descrittori ortogonali. I contatori parziali e globali vengono incrementati di 1 unità. \\
+\textbf{Return:} \texttt{true} se il record viene agganciato con successo; \texttt{false} se l'indice di categoria non è valido. \\
+\textbf{Effetti collaterali:} Modifica dei puntatori di testa di ciascun descrittore. Usato esclusivamente durante il caricamento da disco: l'allineamento topologico finale è delegato a \texttt{init\_sorting()}.
+\end{specbox}
+
+\newpage
+
+\subsubsection{\texttt{quicksort} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{arr} array pre-allocato; \texttt{low} e \texttt{high} indici rientranti nei limiti fisici del vettore. \\
+\textbf{Post-condizioni:} Gli indirizzi di memoria contenuti in \texttt{arr} vengono riordinati in-place. I dati fisici dei nodi non vengono copiati: vengono scambiati solo i puntatori. \\
+\textbf{Parametro \texttt{type}:} 1 = Data, 2 = ID, 3 = Urgenza, 4 = Stato. \\
+\textbf{Effetti collaterali:} Ricorsione su sottovettori sinistro e destro rispetto al pivot. Complessità media $\mathcal{O}(N \log N)$.
+\end{specbox}
+
+\subsubsection{\texttt{getRandomId} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} valido; \texttt{catIdx} $\in [0, \texttt{allCat}-1]$; \texttt{prefix} codice ministeriale valido a due cifre. \\
+\textbf{Post-condizioni:} Lo stato del grafo rimane invariato. \\
+\textbf{Return:} Identificativo intero a 32 bit univoco all'interno del sistema corrente. \\
+\textbf{Effetti collaterali:} Ciclo \texttt{do-while} difensivo: se viene generato un ID duplicato, l'algoritmo rigenera finché non trova un valore univoco, scansionando linearmente il bucket della categoria.
+\end{specbox}
+
+\subsubsection{\texttt{getPosition} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{root} e \texttt{newSeg} non nulli; \texttt{catIdx} $\in [0, \texttt{allCat}-1]$. \\
+\textbf{Post-condizioni:} Il nodo viene inserito in posizione ordinata negli assi \texttt{nextData} e \texttt{nextId} (inserimento ordinato con scansione lineare), e in testa in $\mathcal{O}(1)$ negli assi \texttt{nextStato} e \texttt{nextUrg}. Tutti i contatori vengono incrementati. \\
+\textbf{Effetti collaterali:} Usata esclusivamente per l'inserimento a caldo di nuovi record tramite \texttt{getNewSeg()}.
+\end{specbox}
+
+\subsubsection{\texttt{appendNewSeg} (interna)}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} \texttt{newSeg} valido e completamente valorizzato; \texttt{fileName} percorso accessibile in scrittura. \\
+\textbf{Post-condizioni:} I campi del nodo vengono serializzati su disco in un blocco binario contiguo. Lo stream viene chiuso correttamente. Lo stato del grafo in memoria RAM rimane inalterato. \\
+\textbf{Effetti collaterali:} Apertura del file in modalità \texttt{"ab"} (append binario), che garantisce l'aggiunta del record senza riscrivere i dati preesistenti.
+\end{specbox}
+
+\newpage
+
+\subsection{Specifica sintattica di main.c}
+\begin{lstlisting}[style=cstyle, numbers=none]
+void init(void);
+void handle_signal(int signum);
+int  main(void);
+\end{lstlisting}
+
+\subsection{Specifica semantica di main.c}
+
+\subsubsection{\texttt{init}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} Il file database binario deve esistere ed essere accessibile. \\
+\textbf{Post-condizioni:} La struttura Root viene allocata e inizializzata; le segnalazioni vengono caricate dal file binario; gli indici ortogonali vengono ricostruiti e ordinati; il tempo di caricamento viene misurato e visualizzato a video. \\
+\textbf{Effetti collaterali:} Popola la variabile globale \texttt{sistema}; utilizza le primitive POSIX \texttt{clock()} per la misurazione delle prestazioni.
+\end{specbox}
+
+\subsubsection{\texttt{handle\_signal}}
+\vspace{3mm}
+\begin{specbox}
+\textbf{Pre-condizioni:} Intercettazione del segnale \texttt{SIGINT} (Ctrl+C). \\
+\textbf{Post-condizioni:} Interrompe in sicurezza l'applicazione evitando la terminazione sporca del processo. \\
+\textbf{Effetti collaterali:} Invoca \texttt{salvataggio(sistema)}, che a sua volta persiste il database, dealloca il grafo e chiama \texttt{exit(0)}.
+\end{specbox}
+
+\section{Suite di unit testing: \texttt{main.t.c}}
+Il file \texttt{src/test/main.t.c}, accennato nella panoramica dei moduli (Sezione~\ref{sec:testdir}), costituisce la corazzatura di isolamento del progetto. È una suite di unit testing pura che non interagisce con le funzioni grafiche dell'HUD, concepita per verificare in modo matematico la correetezza dell'ADT mediante le macro di asserzione strutturale fornite da \texttt{<assert.h>}.
+
+Le asserzioni agiscono come sbarramenti logici invalicabili: se una singola funzione restituisce un valore non conforme alle specifiche semantiche, l'asserzione fallisce interrompendo istantaneamente l'esecuzione del programma e stampando la riga esatta del sorgente in cui si è verificata l'anomalia.
+
+L'ispezione analitica ripercorre la suite test per test:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Inizializzazione e Bootstrap:} Il test invoca \texttt{init\_root()} e applica immediatamente lo sbarramento \texttt{assert(test\_root != NULL)}. Questo accerta che la struttura di controllo principale sia allocata correttamente in Heap prima di eseguire qualsiasi operazione sul database. Successivamente, tramite \texttt{init\_loadingDb} e \texttt{init\_sorting}, viene convalidata l'operazione di streaming da disco e la corretta edificazione iniziale della topologia del grafo multi-indice, verificando con \texttt{assert(totIniziale > 0)} il caricamento dei record.
+    
+    \item \textbf{Test 1 --- Consistenza dei Contatori Aggregati:} Dopo il popolamento del sistema, il test estrae i parziali degli stati operativi e verifica l'invariante di consistenza strutturale:
+\begin{lstlisting}[style=cstyle, numbers=none]
+int aperte = getTotalAperte(test_root);
+int risol  = getTotalRis(test_root);
+int chiuse = getTotalChiuse(test_root);
+assert(aperte + risol + chiuse == getTotalSeg(test_root));
+\end{lstlisting}
+    Questo garantisce che l'inserimento nei quattro indici sia avvenuto in modo simmetrico, che non vi siano elementi orfani o duplicati nelle catene operazionali e che i contatori interni non siano corrotti.
+    
+    \item \textbf{Test 2 --- Robustezza del Motore di Ricerca e Casi Limite:} Viene testata la stabilità e la sicurezza difensiva della funzione \texttt{search\_seg} sottoponendola a sollecitazioni di input non standard, spurie o fuori range:
+\begin{lstlisting}[style=cstyle, numbers=none]
+search_seg(test_root, "");
+search_seg(test_root, "-999");
+search_seg(test_root, "99999999");
+\end{lstlisting}
+    Il test convalida che stringhe vuote, identificativi negativi o chiavi numeriche sovrabbondanti rispetto al range di targa vengano intercettati dal modulo senza innescare violazioni di memoria (Segmentation Fault) o cicli infiniti. Inoltre, verifica che la funzione effettui correttamente il partizionamento dinamico della scansione quando rileva un prefisso valido (es. \texttt{"11"} o \texttt{"10"}), restringendo la ricerca al singolo bucket di categoria.
+    
+    \item \textbf{Test 3 --- Verifica dei Getter Statistici e della Categoria Dominante:} Il test convalida le funzioni dedicate all'estrazione di metriche aggregate. Viene accertato che il contatore delle massime urgenze rispetti i confini di senso (\texttt{assert(urgenti >= 0 \&\& utenti <= totIniziale)}). Successivamente, viene isolato l'indice della categoria più colpita tramite \texttt{getMaxCat} e \texttt{getMaxCatName}, applicando un rigoroso controllo comparativo ad albero:
+\begin{lstlisting}[style=cstyle, numbers=none]
+int maxIdx = getMaxCat(test_root);
+assert(maxIdx >= 0 && maxIdx <= 10);
+int maxCount = getSegCountByCategory(test_root, maxIdx);
+for (int i = 0; i <= 10; i++) {
+    assert(getSegCountByCategory(test_root, i) <= maxCount);
+}
+\end{lstlisting}
+    Tale routine matematica certifica che nessuna categoria nel sistema possieda una densità di record superiore a quella identificata come massima assoluta dal modulo statistico dell'ADT.
+    
+    \item \textbf{Test 4 --- Validazione dell'Attraversamento Cronologico:} Il test estrae la testa cronologica (\texttt{getDataHead}) e naviga i primi 20 nodi usando esclusivamente l'iteratore \texttt{nextForData}. Ad ogni iterazione applica asserzioni rigide: \texttt{getID(curr) != 0}, \texttt{getRawData(curr) > 0}, il range di urgenza $[1, 5]$ e la conformità dello stato operativo $[0, 2]$. Questo accerta che l'asse cronologico sia perfettamente inanellato e non contenga puntatori orfani o dati inconsistenti.
+    
+    \item \textbf{Test 5 --- Controllo della Responsabilità di Memoria di \texttt{getData}:} Verifica che \texttt{getData(NULL) == NULL} per confermare la robustezza del codice difensivo a sbarramento preventivo. Su un nodo valido, accerta che la stringa alfanumerica restituita contenga la corretta formattazione standard (\texttt{GG/MM/AAAA}) con lunghezza esattamente pari a 10 caratteri e che il ciclo di allocazione dinamica sia simmetrico e privo di leak sotto Valgrind.
+    
+    \item \textbf{Test 6 --- Validazione Atomica delle Transazioni di Stato:} Testa tutti i sentieri logici e i codici di ritorno della macchina a stati implementata in \texttt{modifySeg}:
+\begin{lstlisting}[style=cstyle, numbers=none]
+assert(modifySeg(test_root, targetId, nuovoStato) == 1);
+assert(modifySeg(test_root, targetId, nuovoStato) == 0);
+assert(modifySeg(test_root, 9999999,  1)          == -1);
+assert(modifySeg(test_root, targetId, 99)          == -1);
+\end{lstlisting}
+    Questo test valida matematicamente il comportamento deterministico dello splicing ortogonale dei puntatori: il valore \texttt{1} per una transizione completata, \texttt{0} per una transizione ridondante sullo stesso stato e \texttt{-1} per violazioni di range dello stato o ID inesistenti. Viene inoltre monitorato il contatore globale per assicurare che rimanga costante durante i riposizionamenti di coda.
+    
+    \item \textbf{Test 7 --- Efficacia della Ricerca Puntuale del Nodo:} Viene validata la funzione d'interfaccia \texttt{findSegByID}. Il test verifica che la scomposizione matematica dell'ID e il successivo scorrimento mirato sul solo bucket della categoria associata restituiscano il puntatore corretto all'indirizzo fisico del nodo opaco se l'ID esiste (\texttt{assert(getID(trovato) == targetId)}), ed emetta in sicurezza un puntatore nullo (\texttt{NULL}) qualora si interroghi il sistema con chiavi non censite.
+    
+    \item \textbf{Test 8 --- Integrità e Irrintracciabilità post-rimozione:} Dopo la chiamata a \texttt{init\_removeSeg}, il test verifica l'estirpazione definitiva del record rintracciato:
+\begin{lstlisting}[style=cstyle, numbers=none]
+assert(getTotalSeg(test_root) == totPrima - 1);
+assert(findSegByID(test_root, targetId) == NULL);
+\end{lstlisting}
+    Questo certifica che il nodo sia stato completamente sfilato da tutti e quattro gli indici ortogonali del grafo (categoria, timeline, stato, urgenza), che le adiacenze dei nodi attigui siano state ricucite in modo transazionale e che la chiamata difensiva su ID inesistenti non provochi mutazioni o instabilità nei contatori o nella RAM.
+    
+    \item \textbf{Test 9 --- Verifica della Persistenza Informativa del Report:} Viene esaminata la capacità del sistema di interagire con il file system per la scrittura dei dati di sintesi. Il test convalida che l'apertura del report testuale in modalità distruttiva (\texttt{"w"}) avvenga con successo e che la riscrittura delle metriche rispecchi fedelmente la densità informativa corrente del grafo prima dello shutdown.
+\end{itemize}
+
+Al termine della suite di test, la chiamata esplicita a \texttt{deleteGraph(test\_root)} esegue il cleanup totale dello Heap, convalidando le politiche di deallocazione controllata che consentono al software di superare i test di profiling di Valgrind con zero leak.
+
+\section{Ambiente di sviluppo e toolchain}
+
+L'intero ecosistema software è stato sviluppato, ottimizzato e testato per operare in ambienti nativi UNIX-like ad alte prestazioni.
+
+\subsection{Sistema operativo}
+Il sistema operativo utilizzato per lo sviluppo è \textbf{Arch Linux}, una distribuzione rolling-release orientata ai programmatori che favorisce il controllo crudo del sistema. L'applicazione è stata concepita per girare in modalità testuale nativa all'interno di una \textbf{TTY pura}, con l'interfaccia grafica rimossa dal boot manager tramite \texttt{systemctl}. Questo ha permesso di testare il software in un ambiente minimale, privo di filtri grafici, esaltando la nitidezza dell'HUD geometrico e la velocità di risposta dei flag POSIX.
+
+\subsection{Compilatore}
+La compilazione è affidata a \textbf{GCC (GNU Compiler Collection)}, versione 15.1.0, utilizzato per la stabilità nell'ottimizzazione del codice macchina e nel tracciamento dei vettori di puntatori.
+
+\subsection{Standard C}
+Il codice rispetta rigorosamente lo standard \textbf{C99} (\texttt{-std=c99}). Questa specifica introduce i tipi interi a dimensione fissa definiti in \texttt{<stdint.h>} (come \texttt{int32\_t}), fondamentali per garantire l'esatta dimensione dei record binari su disco indipendentemente dall'architettura hardware, e consente la dichiarazione delle variabili all'interno dei cicli \texttt{for}, mantenendo il codice pulito e moderno.
+
+\subsection{Flag di compilazione}
+I flag impostati nel Makefile impongono sbarramenti difensivi precisi:
+\begin{itemize}[noitemsep]
+    \item \texttt{-Wall -Wextra}: Attivano la totalità dei controlli sintattici del compilatore, segnalando confronti tra tipi diversi o variabili inutilizzate.
+    \item \texttt{-O2}: Abilita l'ottimizzazione a livello di registri della CPU, velocizzando i cicli interni di Quicksort e i riallineamenti dei puntatori.
+    \item \texttt{-g}: Include i simboli di debug nel binario, mappando le istruzioni macchina con le righe del sorgente C per l'analisi con Valgrind e GDB.
+    \item \texttt{-D\_DEFAULT\_SOURCE}: Abilita l'esposizione delle macro POSIX standard necessarie alla manipolazione dei descrittori del terminale.
+\end{itemize}
+
+\subsection{Sistema di build}
+La gestione delle dipendenze e l'automazione della compilazione strutturata sono governate da \textbf{GNU Make}.
+
+\subsection{Analisi dinamica della memoria}
+Il monitoraggio della stabilità dell'Heap è affidato a \textbf{Valgrind 3.25.1 (Memcheck Subsystem)}, utilizzato per verificare l'assenza di leak o sovrascritture di buffer.
+
+\subsection{Analisi di debug a runtime}
+L'ispezione a runtime degli stati interni delle strutture opache è gestita tramite \textbf{GDB (GNU Debugger)}.
+
+\end{document}
